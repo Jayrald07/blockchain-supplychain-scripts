@@ -26,6 +26,7 @@ services:
   orderer.$MSP.com:
     container_name: orderer.$MSP.com
     image: hyperledger/fabric-orderer:2.4.7
+    restart: always
     labels:
       service: hyperledger-fabric
     environment:

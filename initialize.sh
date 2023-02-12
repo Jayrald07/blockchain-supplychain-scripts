@@ -142,6 +142,7 @@ services:
   peer0.$ORG_NAME:
     container_name: peer0.$ORG_NAME
     image: hyperledger/fabric-peer:2.4.7
+    restart: always
     labels:
       service: hyperledger-fabric
     environment:
@@ -180,6 +181,7 @@ services:
   cli.$ORG_NAME:
     container_name: cli.$ORG_NAME
     image: hyperledger/fabric-tools:2.4.7
+    restart: always
     labels:
       service: hyperledger-fabric
     tty: true
@@ -214,6 +216,7 @@ services:
   peer0.$ORG_NAME:
     container_name: peer0.$ORG_NAME
     image: hyperledger/fabric-peer:2.4.7
+    restart: always
     labels:
       service: hyperledger-fabric
     environment:
@@ -227,6 +230,7 @@ services:
   cli.$ORG_NAME:
     container_name: cli.$ORG_NAME
     image: hyperledger/fabric-tools:2.4.7
+    restart: always
     volumes:
       - ./docker/peercfg:/etc/hyperledger/peercfg
   
