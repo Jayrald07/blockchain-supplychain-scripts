@@ -325,6 +325,6 @@ export CORE_PEER_TLS_ENABLED=true
 
 peer channel join -b $PWD/../channel-artifacts/mychannel.block
 
-# docker exec cli.$ORG_NAME sh /etc/hyperledger/anchor/setAnchorPeer.sh $MSP $ORG_NAME $PEER_PORT $CHANNEL_ID $ORDERER_GENERAL_PORT
+docker exec cli.$ORG_NAME sh /etc/hyperledger/anchor/setAnchorPeer.sh $MSP $ORG_NAME $PEER_PORT $CHANNEL_ID $ORDERER_GENERAL_PORT
 
 rm -rf $CONFIGTX/
