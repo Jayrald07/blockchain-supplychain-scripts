@@ -2,8 +2,11 @@
 
 ORG_NAME=""
 CA_SERVER_USERNAME=""
-CA_SERVER_USERNAME=""
+CA_SERVER_PASSWORD=""
 CA_PORT=""
+CA_ORDERER_USERNAME=""
+CA_ORDERER_PASSWORD=""
+CA_ORDERER_PORT=""
 USERNAME=""
 PASSWORD=""
 PEER_PORT=0
@@ -34,7 +37,19 @@ while [[ $# -ge 1 ]] ; do
         ;;
     --ca-port )
         CA_PORT="$2"
-        NODE_OU="localhost-$CA_PORT-ca-server"
+        NODE_OU="localhost-$CA_PORT-ca-$ORG_NAME"
+        shift
+        ;;
+    --ca-orderer-username )
+        CA_ORDERER_USERNAME="$2"
+        shift
+        ;;
+    --ca-orderer-password )
+        CA_ORDERER_PASSWORD="$2"
+        shift
+        ;;
+    --ca-orderer-port )
+        CA_ORDEDER_PORT="$2"
         shift
         ;;
     --u )
@@ -62,11 +77,11 @@ while [[ $# -ge 1 ]] ; do
 done
 
 createIdentity() {
-    mkdir -p $PWD/../organizations/peerOrganizations/$ORG_NAME
+    mkdir -p $PWD/../organizations/peerOrganizations/$ORG_NAME.com
     
-    export FABRIC_CA_CLIENT_HOME=$PWD/../organizations/peerOrganizations/$ORG_NAME
+    export FABRIC_CA_CLIENT_HOME=$PWD/../organizations/peerOrganizations/$ORG_NAME.com
 
-    fabric-ca-client enroll -u https://$CA_SERVER_USERNAME:$CA_SERVER_PASSWORD@localhost:$CA_PORT --caname ca-server --tls.certfiles "$PWD/../../ca/organizations/fabric-ca/ca-server/tls-cert.pem"
+    fabric-ca-client enroll -u https://$CA_SERVER_USERNAME:$CA_SERVER_PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/tls-cert.pem
 
     echo "NodeOUs:
   Enable: true  
@@ -81,45 +96,45 @@ createIdentity() {
     OrganizationalUnitIdentifier: admin  
   OrdererOUIdentifier:
     Certificate: cacerts/$NODE_OU.pem    
-    OrganizationalUnitIdentifier: orderer" > "$PWD/../organizations/peerOrganizations/$ORG_NAME/msp/config.yaml"
+    OrganizationalUnitIdentifier: orderer" > "$PWD/../organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml"
 
-    mkdir -p "$PWD/../organizations/peerOrganizations/$ORG_NAME/msp/tlscacerts"
+    mkdir -p "$PWD/../organizations/peerOrganizations/$ORG_NAME.com/msp/tlscacerts"
 
-    cp "$PWD/../../ca/organizations/fabric-ca/ca-server/ca-cert.pem" "$PWD/../organizations/peerOrganizations/$ORG_NAME/msp/tlscacerts/ca.crt"
+    cp "$PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem" "$PWD/../organizations/peerOrganizations/$ORG_NAME.com/msp/tlscacerts/ca.crt"
 
-    mkdir -p "$PWD/../organizations/peerOrganizations/$ORG_NAME/tlsca" 
+    mkdir -p "$PWD/../organizations/peerOrganizations/$ORG_NAME.com/tlsca" 
 
-    cp "$PWD/../../ca/organizations/fabric-ca/ca-server/ca-cert.pem" "$PWD/../organizations/peerOrganizations/$ORG_NAME/tlsca/tlsca.$ORG_NAME-cert.pem"
+    cp "$PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem" "$PWD/../organizations/peerOrganizations/$ORG_NAME.com/tlsca/tlsca.$ORG_NAME.com-cert.pem"
 
-    mkdir -p "$PWD/../organizations/peerOrganizations/$ORG_NAME/ca"
+    mkdir -p "$PWD/../organizations/peerOrganizations/$ORG_NAME.com/ca"
 
-    cp $PWD/../../ca/organizations/fabric-ca/ca-server/ca-cert.pem $PWD/../organizations/peerOrganizations/$ORG_NAME/ca/ca.$ORG_NAME-cert.pem
+    cp $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem $PWD/../organizations/peerOrganizations/$ORG_NAME.com/ca/ca.$ORG_NAME.com-cert.pem
 
-    fabric-ca-client register --caname ca-server --id.name $USERNAME --id.secret $PASSWORD --id.type peer --tls.certfiles $PWD/../../ca/organizations/fabric-ca/ca-server/tls-cert.pem
+    fabric-ca-client register --caname ca-$ORG_NAME --id.name $USERNAME --id.secret $PASSWORD --id.type peer --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/tls-cert.pem
 
-    fabric-ca-client register --caname ca-server --id.name "$USERNAME-user" --id.secret $PASSWORD --id.type client --tls.certfiles $PWD/../../ca/organizations/fabric-ca/ca-server/ca-cert.pem
+    fabric-ca-client register --caname ca-$ORG_NAME --id.name "$USERNAME-user" --id.secret $PASSWORD --id.type client --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
-    fabric-ca-client register --caname ca-server --id.name "$USERNAME-admin" --id.secret $PASSWORD --id.type admin --tls.certfiles $PWD/../../ca/organizations/fabric-ca/ca-server/ca-cert.pem
+    fabric-ca-client register --caname ca-$ORG_NAME --id.name "$USERNAME-admin" --id.secret $PASSWORD --id.type admin --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
-    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@localhost:$CA_PORT --caname ca-server -M $PWD/../organizations/peerOrganizations/$ORG_NAME/peers/peer0.$ORG_NAME/msp --csr.hosts peer0.$ORG_NAME --tls.certfiles $PWD/../../ca/organizations/fabric-ca/ca-server/ca-cert.pem
+    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/msp --csr.hosts peer0.$ORG_NAME.com --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
-    cp $PWD/../organizations/peerOrganizations/$ORG_NAME/msp/config.yaml $PWD/../organizations/peerOrganizations/$ORG_NAME/peers/peer0.$ORG_NAME/msp/config.yaml
+    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/msp/config.yaml
 
-    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@localhost:$CA_PORT --caname ca-server -M $PWD/../organizations/peerOrganizations/$ORG_NAME/peers/peer0.$ORG_NAME/tls --enrollment.profile tls --csr.hosts peer0.$ORG_NAME --csr.hosts localhost --tls.certfiles $PWD/../../ca/organizations/fabric-ca/ca-server/ca-cert.pem
+    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/tls --enrollment.profile tls --csr.hosts peer0.$ORG_NAME.com --csr.hosts localhost --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
-    cp $PWD/../organizations/peerOrganizations/$ORG_NAME/peers/peer0.$ORG_NAME/tls/tlscacerts/* $PWD/../organizations/peerOrganizations/$ORG_NAME/peers/peer0.$ORG_NAME/tls/ca.crt
+    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/tls/tlscacerts/* $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/tls/ca.crt
 
-    cp $PWD/../organizations/peerOrganizations/$ORG_NAME/peers/peer0.$ORG_NAME/tls/signcerts/* $PWD/../organizations/peerOrganizations/$ORG_NAME/peers/peer0.$ORG_NAME/tls/server.crt
+    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/tls/signcerts/* $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/tls/server.crt
 
-    cp $PWD/../organizations/peerOrganizations/$ORG_NAME/peers/peer0.$ORG_NAME/tls/keystore/* $PWD/../organizations/peerOrganizations/$ORG_NAME/peers/peer0.$ORG_NAME/tls/server.key
+    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/tls/keystore/* $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/tls/server.key
 
-    fabric-ca-client enroll -u https://"$USERNAME-user":$PASSWORD@localhost:$CA_PORT --caname ca-server -M $PWD/../organizations/peerOrganizations/$ORG_NAME/users/User1@$ORG_NAME/msp --tls.certfiles $PWD/../../ca/organizations/fabric-ca/ca-server/ca-cert.pem
+    fabric-ca-client enroll -u https://"$USERNAME-user":$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/../organizations/peerOrganizations/$ORG_NAME.com/users/User1@$ORG_NAME.com/msp --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
-    cp $PWD/../organizations/peerOrganizations/$ORG_NAME/msp/config.yaml $PWD/../organizations/peerOrganizations/$ORG_NAME/users/User1@$ORG_NAME/msp/config.yaml
+    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml $PWD/../organizations/peerOrganizations/$ORG_NAME.com/users/User1@$ORG_NAME.com/msp/config.yaml
 
-    fabric-ca-client enroll -u https://"$USERNAME-admin":$PASSWORD@localhost:$CA_PORT --caname ca-server -M $PWD/../organizations/peerOrganizations/$ORG_NAME/users/Admin@$ORG_NAME/msp --tls.certfiles $PWD/../../ca/organizations/fabric-ca/ca-server/ca-cert.pem
+    fabric-ca-client enroll -u https://"$USERNAME-admin":$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/../organizations/peerOrganizations/$ORG_NAME.com/users/Admin@$ORG_NAME.com/msp --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
-    cp $PWD/../organizations/peerOrganizations/$ORG_NAME/msp/config.yaml $PWD/../organizations/peerOrganizations/$ORG_NAME/users/Admin@$ORG_NAME/msp/config.yaml
+    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml $PWD/../organizations/peerOrganizations/$ORG_NAME.com/users/Admin@$ORG_NAME.com/msp/config.yaml
 
 }
 
@@ -131,7 +146,7 @@ createCompose() {
 echo "version: '3.7'
 
 volumes:
-  peer0.$ORG_NAME:
+  peer0.$ORG_NAME.com:
 
 networks:
   production:
@@ -139,8 +154,8 @@ networks:
 
 services:
 
-  peer0.$ORG_NAME:
-    container_name: peer0.$ORG_NAME
+  peer0.$ORG_NAME.com:
+    container_name: peer0.$ORG_NAME.com
     image: hyperledger/fabric-peer:2.4.7
     restart: always
     labels:
@@ -156,21 +171,21 @@ services:
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
       # Peer specific variables
-      - CORE_PEER_ID=peer0.$ORG_NAME
-      - CORE_PEER_ADDRESS=peer0.$ORG_NAME:$PEER_PORT
+      - CORE_PEER_ID=peer0.$ORG_NAME.com
+      - CORE_PEER_ADDRESS=peer0.$ORG_NAME.com:$PEER_PORT
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
       - CORE_PEER_LISTENADDRESS=0.0.0.0:$PEER_PORT
-      - CORE_PEER_CHAINCODEADDRESS=peer0.$ORG_NAME:$inc
+      - CORE_PEER_CHAINCODEADDRESS=peer0.$ORG_NAME.com:$inc
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:$inc
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.$ORG_NAME:$PEER_PORT
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.$ORG_NAME:$PEER_PORT
-      - CORE_PEER_LOCALMSPID=${MSP}
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.$ORG_NAME.com:$PEER_PORT
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.$ORG_NAME.com:$PEER_PORT
+      - CORE_PEER_LOCALMSPID=$(echo $ORG_NAME)MSP
       - CORE_METRICS_PROVIDER=prometheus
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={\"peername\":\"peer0org1\"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s      
     volumes:
-      - ../organizations/peerOrganizations/$ORG_NAME/peers/peer0.$ORG_NAME:/etc/hyperledger/fabric        
-      - peer0.$ORG_NAME:/var/hyperledger/production
+      - ../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com:/etc/hyperledger/fabric        
+      - peer0.$ORG_NAME.com:/var/hyperledger/production
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
     ports:
@@ -178,8 +193,8 @@ services:
     networks:
       - production
 
-  cli.$ORG_NAME:
-    container_name: cli.$ORG_NAME
+  cli.$ORG_NAME.com:
+    container_name: cli.$ORG_NAME.com
     image: hyperledger/fabric-tools:2.4.7
     restart: always
     labels:
@@ -199,7 +214,7 @@ services:
       - ../../orderer/organizations/ordererOrganizations/orderer.supplychain.com/tlsca/tlsca.orderer.supplychain.com-cert.pem:/etc/hyperledger/orderer/tlsca.orderer.supplychain.com-cert.pem
       - ../scripts/setAnchorPeer.sh:/etc/hyperledger/anchor/setAnchorPeer.sh
     depends_on:
-      - peer0.$ORG_NAME
+      - peer0.$ORG_NAME.com
     networks:
       - production
     
@@ -213,8 +228,8 @@ networks:
 
 services:
 
-  peer0.$ORG_NAME:
-    container_name: peer0.$ORG_NAME
+  peer0.$ORG_NAME.com:
+    container_name: peer0.$ORG_NAME.com
     image: hyperledger/fabric-peer:2.4.7
     restart: always
     labels:
@@ -227,8 +242,8 @@ services:
       - ./docker/peercfg:/etc/hyperledger/peercfg
       - \${DOCKER_SOCK}:/host/var/run/docker.sock
 
-  cli.$ORG_NAME:
-    container_name: cli.$ORG_NAME
+  cli.$ORG_NAME.com:
+    container_name: cli.$ORG_NAME.com
     image: hyperledger/fabric-tools:2.4.7
     restart: always
     volumes:
