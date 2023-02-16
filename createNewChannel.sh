@@ -33,16 +33,16 @@ echo "# Copyright IBM Corp. All Rights Reserved.
 Organizations:
   # SampleOrg defines an MSP using the sampleconfig.  It should never be used
   # in production but may be used as a template for other definitions
-  - &OrdererOrg
+  - &Orderer$(echo $ORG_NAME)Org
     # DefaultOrg defines the organization which is used in the sampleconfig
     # of the fabric.git development environment
-    Name: OrdererOrg
+    Name: Orderer$(echo $ORG_NAME)Org
 
     # ID to load the MSP definition as
-    ID: OrdererMSP
+    ID: Orderer$(echo $ORG_NAME)MSP
 
     # MSPDir is the filesystem path which contains the MSP configuration
-    MSPDir: $PWD/../organizations/ordererOrganizations/orderer.$(echo $MSP)MSP.com/msp
+    MSPDir: $PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/msp
 
     # Policies defines the set of policies at this level of the config tree
     # For organization policies, their canonical path is usually
@@ -50,26 +50,26 @@ Organizations:
     Policies:
       Readers:
         Type: Signature
-        Rule: \"OR('OrdererMSP.member')\"
+        Rule: \"OR('Orderer$(echo $ORG_NAME)MSP.member')\"
       Writers:
         Type: Signature
-        Rule: \"OR('OrdererMSP.member')\"
+        Rule: \"OR('Orderer$(echo $ORG_NAME)MSP.member')\"
       Admins:
         Type: Signature
-        Rule: \"OR('OrdererMSP.admin')\"
+        Rule: \"OR('Orderer$(echo $ORG_NAME)MSP.admin')\"
 
     OrdererEndpoints:
-      - localhost:$ORDERER_GENERAL_PORT
+      - orderer.$ORG_NAME.com:$ORDERER_GENERAL_PORT
 
-  - &$MSP
+  - &$(echo $ORG_NAME)MSP
     # DefaultOrg defines the organization which is used in the sampleconfig
     # of the fabric.git development environment
-    Name: $(echo $MSP)MSP
+    Name: $(echo $ORG_NAME)MSP
 
     # ID to load the MSP definition as
-    ID: $(echo $MSP)MSP
+    ID: $(echo $ORG_NAME)MSP
 
-    MSPDir: $PWD/../organizations/peerOrganizations/$ORG_NAME/msp
+    MSPDir: $PWD/../organizations/peerOrganizations/$ORG_NAME.com/msp
 
     # Policies defines the set of policies at this level of the config tree
     # For organization policies, their canonical path is usually
@@ -77,16 +77,16 @@ Organizations:
     Policies:
       Readers:
         Type: Signature
-        Rule: \"OR('$(echo $MSP)MSP.admin', '$(echo $MSP)MSP.peer', '$(echo $MSP)MSP.client')\"
+        Rule: \"OR('$(echo $ORG_NAME)MSP.admin', '$(echo $ORG_NAME)MSP.peer', '$(echo $ORG_NAME)MSP.client')\"
       Writers:
         Type: Signature
-        Rule: \"OR('$(echo $MSP)MSP.admin', '$(echo $MSP)MSP.client')\"
+        Rule: \"OR('$(echo $ORG_NAME)MSP.admin', '$(echo $ORG_NAME)MSP.client')\"
       Admins:
         Type: Signature
-        Rule: \"OR('$(echo $MSP)MSP.admin')\"
+        Rule: \"OR('$(echo $ORG_NAME)MSP.admin')\"
       Endorsement:
         Type: Signature
-        Rule: \"OR('$(echo $MSP)MSP.peer')\"
+        Rule: \"OR('$(echo $ORG_NAME)MSP.peer')\"
 
 ################################################################################
 #
@@ -172,10 +172,10 @@ Application: &ApplicationDefaults
       Rule: \"MAJORITY Admins\"
     LifecycleEndorsement:
       Type: Signature
-      Rule: \"OR('$(echo $MSP)MSP.member','$(echo $OTHER_ORG_MSP)MSP.member')\"
+      Rule: \"OR('$(echo $ORG_NAME)MSP.member','$(echo $OTHER_ORG_MSP)MSP.member')\"
     Endorsement:
       Type: Signature
-      Rule: \"OR('$(echo $MSP)MSP.member','$(echo $OTHER_ORG_MSP)MSP.member')\"
+      Rule: \"OR('$(echo $ORG_NAME)MSP.member','$(echo $OTHER_ORG_MSP)MSP.member')\"
 
   Capabilities:
     <<: *ApplicationCapabilities
@@ -195,14 +195,14 @@ Orderer: &OrdererDefaults # Orderer Type: The orderer implementation to start
   # as TLS validation.  The preferred way to specify orderer addresses is now
   # to include the OrdererEndpoints item in your org definition
   Addresses:
-    - localhost:$ORDERER_GENERAL_PORT
+    - orderer.$ORG_NAME.com:$ORDERER_GENERAL_PORT
 
   EtcdRaft:
     Consenters:
-      - Host: localhost
+      - Host: orderer.$ORG_NAME.com
         Port: $ORDERER_GENERAL_PORT
-        ClientTLSCert: $PWD/../organizations/ordererOrganizations/orderer.$(echo $MSP)MSP.com/orderers/orderer.$(echo $MSP)MSP.com/tls/server.crt
-        ServerTLSCert: $PWD/../organizations/ordererOrganizations/orderer.$(echo $MSP)MSP.com/orderers/orderer.$(echo $MSP)MSP.com/tls/server.crt
+        ClientTLSCert: $PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.crt
+        ServerTLSCert: $PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.crt
 
   # Batch Timeout: The amount of time to wait before creating a batch
   BatchTimeout: 2s
@@ -285,17 +285,17 @@ Channel: &ChannelDefaults
 #
 ################################################################################
 Profiles:
-  TwoOrgsApplicationGenesis:
+  ConnectionGenesis:
     <<: *ChannelDefaults
     Orderer:
       <<: *OrdererDefaults
       Organizations:
-        - *OrdererOrg
+        - *Orderer$(echo $ORG_NAME)Org
       Capabilities: *OrdererCapabilities
     Application:
       <<: *ApplicationDefaults
       Organizations:
-        - *$MSP
+        - *$(echo $ORG_NAME)MSP
       Capabilities: *ApplicationCapabilities
 
 " > $CONFIGTX/configtx.yaml
@@ -306,25 +306,25 @@ export FABRIC_CFG_PATH=$CONFIGTX
 
 # Create genesis block
 # It needs FABRIC_CFG_PATH which points to /config folder. It will find for configtx,yaml
-configtxgen -profile TwoOrgsApplicationGenesis -outputBlock $PWD/../channel-artifacts/mychannel.block -channelID $CHANNEL_ID
+configtxgen -profile ConnectionGenesis -outputBlock $PWD/../channel-artifacts/mychannel.block -channelID $CHANNEL_ID
 
 # Join orderer on the channel
 # Make sure you have the copy of orderer MSP
-export ORDERER_CA=$PWD/../organizations/ordererOrganizations/orderer.$(echo $MSP)MSP.com/tlsca/tlsca.orderer.$(echo $MSP)MSP.com-cert.pem
-export ORDERER_ADMIN_TLS_SIGN_CERT=$PWD/../organizations/ordererOrganizations/orderer.$(echo $MSP)MSP.com/orderers/orderer.$(echo $MSP)MSP.com/tls/server.crt
-export ORDERER_ADMIN_TLS_PRIVATE_KEY=$PWD/../organizations/ordererOrganizations/orderer.$(echo $MSP)MSP.com/orderers/orderer.$(echo $MSP)MSP.com/tls/server.key
+export ORDERER_CA=$PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/tlsca/tlsca.orderer.$(echo $ORG_NAME).com-cert.pem
+export ORDERER_ADMIN_TLS_SIGN_CERT=$PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.crt
+export ORDERER_ADMIN_TLS_PRIVATE_KEY=$PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.key
 
 osnadmin channel join --channelID $CHANNEL_ID --config-block $PWD/../channel-artifacts/mychannel.block -o localhost:$ORDERER_ADMIN_PORT --ca-file ${ORDERER_CA} --client-cert ${ORDERER_ADMIN_TLS_SIGN_CERT} --client-key ${ORDERER_ADMIN_TLS_PRIVATE_KEY}
 
 # Join peer to channel (every peer)
-export CORE_PEER_LOCALMSPID=$(echo $MSP)MSP
-export CORE_PEER_TLS_ROOTCERT_FILE=$PWD/../organizations/peerOrganizations/$ORG_NAME/tlsca/tlsca.$ORG_NAME-cert.pem
-export CORE_PEER_MSPCONFIGPATH=$PWD/../organizations/peerOrganizations/$ORG_NAME/users/Admin@$ORG_NAME/msp
+export CORE_PEER_LOCALMSPID=$(echo $ORG_NAME)MSP
+export CORE_PEER_TLS_ROOTCERT_FILE=$PWD/../organizations/peerOrganizations/$ORG_NAME.com/tlsca/tlsca.$ORG_NAME.com-cert.pem
+export CORE_PEER_MSPCONFIGPATH=$PWD/../organizations/peerOrganizations/$ORG_NAME.com/users/Admin@$ORG_NAME.com/msp
 export CORE_PEER_ADDRESS=localhost:$PEER_PORT
 export CORE_PEER_TLS_ENABLED=true
 
 peer channel join -b $PWD/../channel-artifacts/mychannel.block
 
-docker exec cli.$ORG_NAME sh /etc/hyperledger/anchor/setAnchorPeer.sh $MSP $ORG_NAME $PEER_PORT $CHANNEL_ID $ORDERER_GENERAL_PORT
+# docker exec cli.$ORG_NAME sh /etc/hyperledger/anchor/setAnchorPeer.sh $MSP $ORG_NAME $PEER_PORT $CHANNEL_ID $ORDERER_GENERAL_PORT
 
 rm -rf $CONFIGTX/
