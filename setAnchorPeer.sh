@@ -1,26 +1,27 @@
 #!/bin/bash
 
-ORG_MSP=$1
-ORG_NAME=$2
-PEER_PORT=$3
-CHANNEL_ID=$4
-ORDERER_GENERAL_PORT=$5
-ORDERER_CA=/etc/hyperledger/orderer/tlsca.orderer.$ORG_MSP.com-cert.pem
+ORG_NAME=$1
+PEER_PORT=$2
+CHANNEL_ID=$3
+ORDERER_GENERAL_PORT=$4
+ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/orderer.$ORG_NAME.com/tlsca/tlsca.orderer.$ORG_NAME.com-cert.pem
 
-export CORE_PEER_LOCALMSPID=$(echo $ORG_MSP)MSP
-export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/$ORG_NAME/tlsca/tlsca.$ORG_NAME-cert.pem
-export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/$ORG_NAME/users/Admin@$ORG_NAME/msp
-export CORE_PEER_ADDRESS=localhost:$PEER_PORT
+export CORE_PEER_LOCALMSPID=$(echo $ORG_NAME)MSP
+export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/$ORG_NAME/tlsca/tlsca.$ORG_NAME.com-cert.pem
+export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/$ORG_NAME.com/users/Admin@$ORG_NAME.com/msp
+export CORE_PEER_ADDRESS=$ORG_NAME.com:$PEER_PORT
 export CORE_PEER_TLS_ENABLED=true
 
 # Create anchor peers
-peer channel fetch config config_block.pb -o localhost:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.supplychain.com -c $CHANNEL_ID --tls --cafile ${ORDERER_CA}
+peer channel fetch config config_block.pb -o orderer.$ORG_NAME.com:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.$ORG_NAME.com -c $CHANNEL_ID --tls --cafile $ORDERER_CA
 
 configtxlator proto_decode --input config_block.pb --type common.Block --output config_block.json
 
 jq .data.data[0].payload.data.config config_block.json > MSPconfig.json
 
-jq '.channel_group.groups.Application.groups.'$(echo $ORG_MSP)'MSP.values += {"AnchorPeers":{"mod_policy": "Admins","value":{"anchor_peers": [{"host": "peer0.'$ORG_NAME'","port": '$PEER_PORT'}]},"version": "0"}}' MSPconfig.json > MSPconfigmodified_config.json
+echo '.channel_group.groups.Application.groups.'$(echo $ORG_NAME)'MSP.values += {"AnchorPeers":{"mod_policy": "Admins","value":{"anchor_peers": [{"host": "'$ORG_NAME'.com","port": "'$PEER_PORT'"}]},"version": "0"}}'
+
+jq '.channel_group.groups.Application.groups.'$(echo $ORG_NAME)'MSP.values += {"AnchorPeers":{"mod_policy": "Admins","value":{"anchor_peers": [{"host": "'$ORG_NAME'.com","port": "'$PEER_PORT'"}]},"version": "0"}}' MSPconfig.json > MSPconfigmodified_config.json
 
 configtxlator proto_encode --input MSPconfig.json --type common.Config --output original_config.pb
 
@@ -34,7 +35,7 @@ echo '{"payload":{"header":{"channel_header":{"channel_id":"'$CHANNEL_ID'","type
 
 configtxlator proto_encode --input config_update_in_envelope.json --type common.Envelope --output MSPanchors.tx
 
-peer channel update -o localhost:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.supplychain.com -c $CHANNEL_ID -f MSPanchors.tx --tls --cafile ${ORDERER_CA}
+peer channel update -o orderer.$ORG_NAME.com:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.$ORG_NAME.com -c $CHANNEL_ID -f MSPanchors.tx --tls --cafile ${ORDERER_CA}
 
 
 rm *.tx *.json *.pb
