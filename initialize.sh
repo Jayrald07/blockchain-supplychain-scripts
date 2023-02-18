@@ -18,8 +18,8 @@ while [[ $# -ge 1 ]] ; do
     case $arg in
     --reset )
         rm -rf $PWD/../compose $PWD/../config $PWD/../organizations $PWD/../channel-artifacts
-        docker stop "peer0.$PEER_CONTAINER"
-        docker rm "peer0.$PEER_CONTAINER"
+        docker stop "$PEER_CONTAINER"
+        docker rm "$PEER_CONTAINER"
         exit 1
         ;;
     --on )
@@ -116,17 +116,17 @@ createIdentity() {
 
     fabric-ca-client register --caname ca-$ORG_NAME --id.name "$USERNAME-admin" --id.secret $PASSWORD --id.type admin --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
-    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/msp --csr.hosts peer0.$ORG_NAME.com --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
+    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/msp --csr.hosts $ORG_NAME.com --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
-    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/msp/config.yaml
+    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/msp/config.yaml
 
-    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/tls --enrollment.profile tls --csr.hosts peer0.$ORG_NAME.com --csr.hosts localhost --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
+    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls --enrollment.profile tls --csr.hosts $ORG_NAME.com --csr.hosts localhost --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
-    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/tls/tlscacerts/* $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/tls/ca.crt
+    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/tlscacerts/* $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/ca.crt
 
-    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/tls/signcerts/* $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/tls/server.crt
+    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/signcerts/* $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/server.crt
 
-    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/tls/keystore/* $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com/tls/server.key
+    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/keystore/* $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/server.key
 
     fabric-ca-client enroll -u https://"$USERNAME-user":$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/../organizations/peerOrganizations/$ORG_NAME.com/users/User1@$ORG_NAME.com/msp --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
@@ -146,7 +146,7 @@ createCompose() {
 echo "version: '3.7'
 
 volumes:
-  peer0.$ORG_NAME.com:
+  $ORG_NAME.com:
 
 networks:
   production:
@@ -154,8 +154,8 @@ networks:
 
 services:
 
-  peer0.$ORG_NAME.com:
-    container_name: peer0.$ORG_NAME.com
+  $ORG_NAME.com:
+    container_name: $ORG_NAME.com
     image: hyperledger/fabric-peer:2.4.7
     restart: always
     labels:
@@ -171,21 +171,21 @@ services:
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
       # Peer specific variables
-      - CORE_PEER_ID=peer0.$ORG_NAME.com
-      - CORE_PEER_ADDRESS=peer0.$ORG_NAME.com:$PEER_PORT
+      - CORE_PEER_ID=$ORG_NAME.com
+      - CORE_PEER_ADDRESS=$ORG_NAME.com:$PEER_PORT
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
       - CORE_PEER_LISTENADDRESS=0.0.0.0:$PEER_PORT
-      - CORE_PEER_CHAINCODEADDRESS=peer0.$ORG_NAME.com:$inc
+      - CORE_PEER_CHAINCODEADDRESS=$ORG_NAME.com:$inc
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:$inc
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.$ORG_NAME.com:$PEER_PORT
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.$ORG_NAME.com:$PEER_PORT
+      - CORE_PEER_GOSSIP_BOOTSTRAP=$ORG_NAME.com:$PEER_PORT
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=$ORG_NAME.com:$PEER_PORT
       - CORE_PEER_LOCALMSPID=$(echo $ORG_NAME)MSP
       - CORE_METRICS_PROVIDER=prometheus
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={\"peername\":\"peer0org1\"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s      
     volumes:
-      - ../organizations/peerOrganizations/$ORG_NAME.com/peers/peer0.$ORG_NAME.com:/etc/hyperledger/fabric        
-      - peer0.$ORG_NAME.com:/var/hyperledger/production
+      - ../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com:/etc/hyperledger/fabric        
+      - $ORG_NAME.com:/var/hyperledger/production
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
     ports:
@@ -214,7 +214,7 @@ services:
       - ../../orderer/organizations/ordererOrganizations/orderer.supplychain.com/tlsca/tlsca.orderer.supplychain.com-cert.pem:/etc/hyperledger/orderer/tlsca.orderer.supplychain.com-cert.pem
       - ../scripts/setAnchorPeer.sh:/etc/hyperledger/anchor/setAnchorPeer.sh
     depends_on:
-      - peer0.$ORG_NAME.com
+      - $ORG_NAME.com
     networks:
       - production
     
@@ -228,8 +228,8 @@ networks:
 
 services:
 
-  peer0.$ORG_NAME.com:
-    container_name: peer0.$ORG_NAME.com
+  $ORG_NAME.com:
+    container_name: $ORG_NAME.com
     image: hyperledger/fabric-peer:2.4.7
     restart: always
     labels:

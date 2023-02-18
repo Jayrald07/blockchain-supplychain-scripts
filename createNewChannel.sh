@@ -3,14 +3,11 @@
 # ./scripts/createNewChannel.sh channel2 DistributorEmpino empino.distributor.com 28051
 
 CHANNEL_ID=$1
-MSP=$2
-OTHER_ORG_MSP=$3
-ORG_NAME=$4
-PEER_PORT=$5
-ORDERER_ADMIN_PORT=$6
-ORDERER_GENERAL_PORT=$7
-
-
+OTHER_ORG_MSP=$2
+ORG_NAME=$3
+PEER_PORT=$4
+ORDERER_ADMIN_PORT=$5
+ORDERER_GENERAL_PORT=$6
 
 # Define here the dynamic configtx.yaml generation
 
@@ -171,11 +168,11 @@ Application: &ApplicationDefaults
       Type: ImplicitMeta
       Rule: \"MAJORITY Admins\"
     LifecycleEndorsement:
-      Type: Signature
-      Rule: \"OR('$(echo $ORG_NAME)MSP.member','$(echo $OTHER_ORG_MSP)MSP.member')\"
+      Type: ImplicitMeta
+      Rule: \"MAJORITY Endorsement\"
     Endorsement:
-      Type: Signature
-      Rule: \"OR('$(echo $ORG_NAME)MSP.member','$(echo $OTHER_ORG_MSP)MSP.member')\"
+      Type: ImplicitMeta
+      Rule: \"MAJORITY Endorsement\"
 
   Capabilities:
     <<: *ApplicationCapabilities
@@ -196,6 +193,7 @@ Orderer: &OrdererDefaults # Orderer Type: The orderer implementation to start
   # to include the OrdererEndpoints item in your org definition
   Addresses:
     - orderer.$ORG_NAME.com:$ORDERER_GENERAL_PORT
+    # - localhost:$ORDERER_GENERAL_PORT
 
   EtcdRaft:
     Consenters:
@@ -325,6 +323,8 @@ export CORE_PEER_TLS_ENABLED=true
 
 peer channel join -b $PWD/../channel-artifacts/mychannel.block
 
-# docker exec cli.$ORG_NAME sh /etc/hyperledger/anchor/setAnchorPeer.sh $MSP $ORG_NAME $PEER_PORT $CHANNEL_ID $ORDERER_GENERAL_PORT
+sleep 2s
+
+docker exec cli.$ORG_NAME.com sh /etc/hyperledger/anchor/setAnchorPeer.sh $ORG_NAME $PEER_PORT $CHANNEL_ID $ORDERER_GENERAL_PORT
 
 rm -rf $CONFIGTX/
