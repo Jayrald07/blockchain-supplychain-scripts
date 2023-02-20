@@ -16,6 +16,3 @@ export CORE_PEER_TLS_ENABLED=true
 
 # fetch the channel config 
 peer channel fetch config $PWD/../channel-artifacts/config_block.pb -o localhost:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.$ORG_NAME.com -c $CHANNEL_ID --tls --cafile ${ORDERER_CA}
-
-
-# configtxlator proto_decode --input $PWD/../channel-artifacts/config_block.pb --type common.Block --output $PWD/../channel-artifacts/config_block.json
