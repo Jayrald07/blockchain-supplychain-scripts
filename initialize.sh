@@ -261,11 +261,11 @@ peer:
 
     # The peer id provides a name for this peer instance and is used when
     # naming docker resources.
-    id: jdoe
+    id: scprod
 
     # The networkId allows for logical separation of networks and is used when
     # naming docker resources.
-    networkId: dev
+    networkId: prod
 
     # The Address at local network interface this Peer will listen on.
     # By default, it will listen on all network interfaces
