@@ -304,7 +304,7 @@ export FABRIC_CFG_PATH=$CONFIGTX
 
 # Create genesis block
 # It needs FABRIC_CFG_PATH which points to /config folder. It will find for configtx,yaml
-configtxgen -profile ConnectionGenesis -outputBlock $PWD/../channel-artifacts/mychannel.block -channelID $CHANNEL_ID
+configtxgen -profile ConnectionGenesis -outputBlock $PWD/../organizations/channel-artifacts/mychannel.block -channelID $CHANNEL_ID
 
 # Join orderer on the channel
 # Make sure you have the copy of orderer MSP
@@ -312,7 +312,7 @@ export ORDERER_CA=$PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG
 export ORDERER_ADMIN_TLS_SIGN_CERT=$PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.crt
 export ORDERER_ADMIN_TLS_PRIVATE_KEY=$PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.key
 
-osnadmin channel join --channelID $CHANNEL_ID --config-block $PWD/../channel-artifacts/mychannel.block -o localhost:$ORDERER_ADMIN_PORT --ca-file ${ORDERER_CA} --client-cert ${ORDERER_ADMIN_TLS_SIGN_CERT} --client-key ${ORDERER_ADMIN_TLS_PRIVATE_KEY}
+osnadmin channel join --channelID $CHANNEL_ID --config-block $PWD/../organizations/channel-artifacts/mychannel.block -o localhost:$ORDERER_ADMIN_PORT --ca-file ${ORDERER_CA} --client-cert ${ORDERER_ADMIN_TLS_SIGN_CERT} --client-key ${ORDERER_ADMIN_TLS_PRIVATE_KEY}
 
 # Join peer to channel (every peer)
 export CORE_PEER_LOCALMSPID=$(echo $ORG_NAME)MSP
@@ -321,7 +321,7 @@ export CORE_PEER_MSPCONFIGPATH=$PWD/../organizations/peerOrganizations/$ORG_NAME
 export CORE_PEER_ADDRESS=localhost:$PEER_PORT
 export CORE_PEER_TLS_ENABLED=true
 
-peer channel join -b $PWD/../channel-artifacts/mychannel.block
+peer channel join -b $PWD/../organizations/channel-artifacts/mychannel.block
 
 sleep 2s
 
