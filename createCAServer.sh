@@ -6,7 +6,7 @@ CA_OPERATION_PORT=$3
 CA_SERVER_ORDERER_PORT=$4
 CA_ORDERER_OPERATION_PORT=$5
 
-mkdir $PWD/../compose/ $PWD/../organizations
+mkdir -p $PWD/../organizations/compose/ $PWD/../organizations
 
 echo "
 version: '3.7'
@@ -33,7 +33,7 @@ services:
       - $CA_OPERATION_PORT:$CA_OPERATION_PORT
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
-      - ../organizations/fabric-ca/$ORG_NAME.com:/etc/hyperledger/fabric-ca-server
+      - ../fabric-ca/$ORG_NAME.com:/etc/hyperledger/fabric-ca-server
     container_name: ca_$ORG_NAME
     networks:
       - production
@@ -54,10 +54,10 @@ services:
       - $CA_ORDERER_OPERATION_PORT:$CA_ORDERER_OPERATION_PORT
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
-      - ../organizations/fabric-ca/orderer$ORG_NAME.com:/etc/hyperledger/fabric-ca-server
+      - ../fabric-ca/orderer$ORG_NAME.com:/etc/hyperledger/fabric-ca-server
     container_name: ca_orderer_$ORG_NAME
     networks:
       - production
-" > $PWD/../compose/ca.yaml
+" > $PWD/../organizations/compose/ca.yaml
 
-docker compose -f $PWD/../compose/ca.yaml up -d
+docker compose -f $PWD/../organizations/compose/ca.yaml up -d

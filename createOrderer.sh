@@ -64,8 +64,8 @@ services:
     working_dir: /root
     command: orderer
     volumes:
-      - ../organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/msp:/var/hyperledger/orderer/msp
-      - ../organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/tls/:/var/hyperledger/orderer/tls
+      - ../ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/msp:/var/hyperledger/orderer/msp
+      - ../ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/tls/:/var/hyperledger/orderer/tls
       - orderer.$ORG_NAME.com:/var/hyperledger/production/orderer
     ports:
       - $GENERAL:$GENERAL
@@ -74,7 +74,7 @@ services:
     networks:
       - production
 
-" > $PWD/../compose/orderer-node.yaml
+" > $PWD/../organizations/compose/orderer-node.yaml
 
 # Create config.yaml under the msp folder of organizations
 # It includes the NodeOUs configuration
@@ -128,4 +128,4 @@ fabric-ca-client enroll -u https://ordererAdminv7:ordererAdminv4pw@localhost:$CA
 
 cp $PWD/../organizations/ordererOrganizations/orderer.$ORG_NAME.com/msp/config.yaml $PWD/../organizations/ordererOrganizations/orderer.$ORG_NAME.com/users/Admin@orderer.$ORG_NAME.com/msp/config.yaml
 
-docker compose -f $PWD/../compose/orderer-node.yaml up -d
+docker compose -f $PWD/../organizations/compose/orderer-node.yaml up -d

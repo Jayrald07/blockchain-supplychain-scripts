@@ -325,6 +325,6 @@ peer channel join -b $PWD/../channel-artifacts/mychannel.block
 
 sleep 2s
 
-docker exec cli.$ORG_NAME.com sh /etc/hyperledger/anchor/setAnchorPeer.sh $ORG_NAME $PEER_PORT $CHANNEL_ID $ORDERER_GENERAL_PORT
+docker exec cli.$ORG_NAME.com sh /opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/setAnchorPeer.sh $ORG_NAME $PEER_PORT $CHANNEL_ID $ORDERER_GENERAL_PORT
 
 rm -rf $CONFIGTX/

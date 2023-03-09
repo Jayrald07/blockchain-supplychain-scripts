@@ -6,9 +6,9 @@ ORDERER_GENERAL_PORT=$3
 CHANNEL_ID=$4
 OTHER_ORG_NAME=$5
 
-export FABRIC_CFG_PATH=$PWD/../config
+export FABRIC_CFG_PATH=$PWD/../organizations/config
 
-export ORDERER_CA=$PWD/../orderer/tlsca.orderer.$OTHER_ORG_NAME.com-cert.pem
+export ORDERER_CA=$PWD/../organizations/orderer/tlsca.orderer.$OTHER_ORG_NAME.com-cert.pem
 # export ORDERER_CA=$PWD/../organizations/ordererOrganizations/orderer.$ORG_NAME.com/tlsca/tlsca.orderer.$ORG_NAME.com-cert.pem
 
 # export the CORE_PEER environment variable - must be the admin or org in the channel
@@ -20,7 +20,7 @@ export CORE_PEER_TLS_ENABLED=true
 
 # peer channel getinfo -c $CHANNEL_ID
 
-peer channel fetch 0 $PWD/../channel-artifacts/mychannel.block -o localhost:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.$OTHER_ORG_NAME.com -c $CHANNEL_ID --tls --cafile $ORDERER_CA
+peer channel fetch 0 $PWD/../organizations/channel-artifacts/mychannel.block -o localhost:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.$OTHER_ORG_NAME.com -c $CHANNEL_ID --tls --cafile $ORDERER_CA
 
 # # join the current org
-peer channel join -b $PWD/../channel-artifacts/mychannel.block
+peer channel join -b $PWD/../organizations/channel-artifacts/mychannel.block

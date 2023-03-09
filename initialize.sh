@@ -17,7 +17,7 @@ while [[ $# -ge 1 ]] ; do
     arg="$1"
     case $arg in
     --reset )
-        rm -rf $PWD/../compose $PWD/../config $PWD/../organizations $PWD/../channel-artifacts
+        rm -rf $PWD/../organizations/compose $PWD/../organizations/config $PWD/../organizations $PWD/../organizations/channel-artifacts
         docker stop "$PEER_CONTAINER"
         docker rm "$PEER_CONTAINER"
         exit 1
@@ -139,7 +139,7 @@ createIdentity() {
 }
 
 createCompose() {
-    mkdir -p $PWD/../compose/docker/peercfg
+    mkdir -p $PWD/../organizations/compose/docker/peercfg
 
     ((inc = PEER_PORT + 1))
 
@@ -184,7 +184,7 @@ services:
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={\"peername\":\"peer0org1\"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s      
     volumes:
-      - ../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com:/etc/hyperledger/fabric        
+      - ../peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com:/etc/hyperledger/fabric        
       - $ORG_NAME.com:/var/hyperledger/production
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
@@ -209,16 +209,14 @@ services:
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: /bin/bash
     volumes:
-      - ../organizations:/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations
-      - ../scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
-      - ../../orderer/organizations/ordererOrganizations/orderer.supplychain.com/tlsca/tlsca.orderer.supplychain.com-cert.pem:/etc/hyperledger/orderer/tlsca.orderer.supplychain.com-cert.pem
-      - ../scripts/setAnchorPeer.sh:/etc/hyperledger/anchor/setAnchorPeer.sh
+      - ../:/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations
+      - ../../scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
     depends_on:
       - $ORG_NAME.com
     networks:
       - production
     
-" > "$PWD/../compose/peer-node.yaml"
+" > "$PWD/../organizations/compose/peer-node.yaml"
 
 echo "version: '3.7'
 
@@ -249,7 +247,7 @@ services:
     volumes:
       - ./docker/peercfg:/etc/hyperledger/peercfg
   
-" > "$PWD/../compose/docker/peer-node.yaml"
+" > "$PWD/../organizations/compose/docker/peer-node.yaml"
 
 
 echo "###############################################################################
@@ -1024,23 +1022,16 @@ metrics:
 
         # prefix is prepended to all emitted statsd metrics
         prefix:
-" > $PWD/../compose/docker/peercfg/core.yaml
+" > $PWD/../organizations/compose/docker/peercfg/core.yaml
 
-cp $PWD/../compose/docker/peercfg/core.yaml $PWD/../config/core.yaml
+cp $PWD/../organizations/compose/docker/peercfg/core.yaml $PWD/../organizations/config/core.yaml
 
 }
 
 
-mkdir $PWD/../organizations $PWD/../config $PWD/../channel-artifacts
-export FABRIC_CFG_PATH=$PWD/../config
+mkdir $PWD/../organizations $PWD/../organizations/config $PWD/../organizations/channel-artifacts
+export FABRIC_CFG_PATH=$PWD/../organizations/config
 createIdentity
 createCompose
 export DOCKER_SOCK=/var/run/docker.sock
-docker compose -f $PWD/../compose/peer-node.yaml -f $PWD/../compose/docker/peer-node.yaml up -d
-# ./initialize.sh --on empino.supplier.com --ca-username admin --ca-password adminpw --ca-port 6054 --u qwerty --p qwerty --pport 27051 --msp RetailerEmpinoMSP
-
-
-# export CORE_PEER_LOCALMSPID="DistributorMSP"
-# export CORE_PEER_TLS_ROOTCERT_FILE=$HOME/supplier/organizations/peerOrganizations/empino.distributor.com/tlsca/tlsca.empino.distributor.com-cert.pem
-# export CORE_PEER_MSPCONFIGPATH=$HOME/supplier/organizations/peerOrganizations/empino.distributor.com/users/Admin@empino.distributor.com/msp
-# export CORE_PEER_ADDRESS=localhost:27051
+docker compose -f $PWD/../organizations/compose/peer-node.yaml -f $PWD/../organizations/compose/docker/peer-node.yaml up -d

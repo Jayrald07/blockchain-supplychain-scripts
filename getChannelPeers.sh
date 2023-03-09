@@ -5,7 +5,7 @@ ORDERER_PEER_PORT=$2
 ORG_NAME=$3
 PEER_PORT=$4
 
-export FABRIC_CFG_PATH=$PWD/../config
+export FABRIC_CFG_PATH=$PWD/../organizations/config
 
 export CORE_PEER_LOCALMSPID=$(echo $ORG_NAME)MSP
 export CORE_PEER_TLS_ROOTCERT_FILE=$PWD/../organizations/peerOrganizations/$ORG_NAME.com/tlsca/tlsca.$ORG_NAME.com-cert.pem

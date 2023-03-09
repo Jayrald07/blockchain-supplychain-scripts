@@ -7,7 +7,7 @@ ORDERER_GENERAL_PORT=$4
 OTHER_ORG_NAME=$5
 ORG_TYPE=$6
 
-export FABRIC_CFG_PATH=$PWD/../config
+export FABRIC_CFG_PATH=$PWD/../organizations/config
 
 export ORDERER_CA=$PWD/../organizations/ordererOrganizations/orderer.$ORG_NAME.com/tlsca/tlsca.orderer.$ORG_NAME.com-cert.pem
 # export ORDERER_CA=$PWD/../orderer/tlsca.orderer.$OTHER_ORG_NAME.com-cert.pem
@@ -41,4 +41,4 @@ fi
 
 # peer channel signconfigtx -f $PWD/../channel-artifacts/_update_in_envelope.pb
 
-peer channel update -f $PWD/../channel-artifacts/_update_in_envelope.pb -c $CHANNEL_ID -o localhost:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.$ORG_NAME.com --tls --cafile $ORDERER_CA
+peer channel update -f $PWD/../organizations/channel-artifacts/_update_in_envelope.pb -c $CHANNEL_ID -o localhost:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.$ORG_NAME.com --tls --cafile $ORDERER_CA

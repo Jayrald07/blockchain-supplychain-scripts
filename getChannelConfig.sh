@@ -3,7 +3,7 @@ PEER_PORT=$2
 CHANNEL_ID=$3
 ORDERER_GENERAL_PORT=$4
 
-export FABRIC_CFG_PATH=$PWD/../config
+export FABRIC_CFG_PATH=$PWD/../organizations/config
 
 export ORDERER_CA=$PWD/../organizations/ordererOrganizations/orderer.$ORG_NAME.com/tlsca/tlsca.orderer.$ORG_NAME.com-cert.pem
 
@@ -15,4 +15,4 @@ export CORE_PEER_ADDRESS=localhost:$PEER_PORT
 export CORE_PEER_TLS_ENABLED=true
 
 # fetch the channel config 
-peer channel fetch config $PWD/../channel-artifacts/config_block.pb -o localhost:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.$ORG_NAME.com -c $CHANNEL_ID --tls --cafile ${ORDERER_CA}
+peer channel fetch config $PWD/../organizations/channel-artifacts/config_block.pb -o localhost:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.$ORG_NAME.com -c $CHANNEL_ID --tls --cafile ${ORDERER_CA}
