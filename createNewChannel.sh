@@ -298,7 +298,7 @@ Profiles:
 
 " > $CONFIGTX/configtx.yaml
 
-cp $PWD/../config/core.yaml $CONFIGTX/core.yaml
+cp $PWD/../organizations/config/core.yaml $CONFIGTX/core.yaml
 
 export FABRIC_CFG_PATH=$CONFIGTX
 
