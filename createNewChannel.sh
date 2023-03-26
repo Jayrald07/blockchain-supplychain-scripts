@@ -39,7 +39,7 @@ Organizations:
     ID: Orderer$(echo $ORG_NAME)MSP
 
     # MSPDir is the filesystem path which contains the MSP configuration
-    MSPDir: $PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/msp
+    MSPDir: $PWD/organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/msp
 
     # Policies defines the set of policies at this level of the config tree
     # For organization policies, their canonical path is usually
@@ -66,7 +66,7 @@ Organizations:
     # ID to load the MSP definition as
     ID: $(echo $ORG_NAME)MSP
 
-    MSPDir: $PWD/../organizations/peerOrganizations/$ORG_NAME.com/msp
+    MSPDir: $PWD/organizations/peerOrganizations/$ORG_NAME.com/msp
 
     # Policies defines the set of policies at this level of the config tree
     # For organization policies, their canonical path is usually
@@ -199,8 +199,8 @@ Orderer: &OrdererDefaults # Orderer Type: The orderer implementation to start
     Consenters:
       - Host: orderer.$ORG_NAME.com
         Port: $ORDERER_GENERAL_PORT
-        ClientTLSCert: $PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.crt
-        ServerTLSCert: $PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.crt
+        ClientTLSCert: $PWD/organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.crt
+        ServerTLSCert: $PWD/organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.crt
 
   # Batch Timeout: The amount of time to wait before creating a batch
   BatchTimeout: 2s
@@ -298,30 +298,30 @@ Profiles:
 
 " > $CONFIGTX/configtx.yaml
 
-cp $PWD/../organizations/config/core.yaml $CONFIGTX/core.yaml
+cp $PWD/organizations/config/core.yaml $CONFIGTX/core.yaml
 
 export FABRIC_CFG_PATH=$CONFIGTX
 
 # Create genesis block
 # It needs FABRIC_CFG_PATH which points to /config folder. It will find for configtx,yaml
-configtxgen -profile ConnectionGenesis -outputBlock $PWD/../organizations/channel-artifacts/mychannel.block -channelID $CHANNEL_ID
+configtxgen -profile ConnectionGenesis -outputBlock $PWD/organizations/channel-artifacts/mychannel.block -channelID $CHANNEL_ID
 
 # Join orderer on the channel
 # Make sure you have the copy of orderer MSP
-export ORDERER_CA=$PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/tlsca/tlsca.orderer.$(echo $ORG_NAME).com-cert.pem
-export ORDERER_ADMIN_TLS_SIGN_CERT=$PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.crt
-export ORDERER_ADMIN_TLS_PRIVATE_KEY=$PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.key
+export ORDERER_CA=$PWD/organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/tlsca/tlsca.orderer.$(echo $ORG_NAME).com-cert.pem
+export ORDERER_ADMIN_TLS_SIGN_CERT=$PWD/organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.crt
+export ORDERER_ADMIN_TLS_PRIVATE_KEY=$PWD/organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.key
 
-osnadmin channel join --channelID $CHANNEL_ID --config-block $PWD/../organizations/channel-artifacts/mychannel.block -o localhost:$ORDERER_ADMIN_PORT --ca-file ${ORDERER_CA} --client-cert ${ORDERER_ADMIN_TLS_SIGN_CERT} --client-key ${ORDERER_ADMIN_TLS_PRIVATE_KEY}
+osnadmin channel join --channelID $CHANNEL_ID --config-block $PWD/organizations/channel-artifacts/mychannel.block -o localhost:$ORDERER_ADMIN_PORT --ca-file ${ORDERER_CA} --client-cert ${ORDERER_ADMIN_TLS_SIGN_CERT} --client-key ${ORDERER_ADMIN_TLS_PRIVATE_KEY}
 
 # Join peer to channel (every peer)
 export CORE_PEER_LOCALMSPID=$(echo $ORG_NAME)MSP
-export CORE_PEER_TLS_ROOTCERT_FILE=$PWD/../organizations/peerOrganizations/$ORG_NAME.com/tlsca/tlsca.$ORG_NAME.com-cert.pem
-export CORE_PEER_MSPCONFIGPATH=$PWD/../organizations/peerOrganizations/$ORG_NAME.com/users/Admin@$ORG_NAME.com/msp
+export CORE_PEER_TLS_ROOTCERT_FILE=$PWD/organizations/peerOrganizations/$ORG_NAME.com/tlsca/tlsca.$ORG_NAME.com-cert.pem
+export CORE_PEER_MSPCONFIGPATH=$PWD/organizations/peerOrganizations/$ORG_NAME.com/users/Admin@$ORG_NAME.com/msp
 export CORE_PEER_ADDRESS=localhost:$PEER_PORT
 export CORE_PEER_TLS_ENABLED=true
 
-peer channel join -b $PWD/../organizations/channel-artifacts/mychannel.block
+peer channel join -b $PWD/organizations/channel-artifacts/mychannel.block
 
 sleep 2s
 

@@ -17,7 +17,7 @@ while [[ $# -ge 1 ]] ; do
     arg="$1"
     case $arg in
     --reset )
-        rm -rf $PWD/../organizations/compose $PWD/../organizations/config $PWD/../organizations $PWD/../organizations/channel-artifacts
+        rm -rf $PWD/organizations/compose $PWD/organizations/config $PWD/organizations $PWD/organizations/channel-artifacts
         docker stop "$PEER_CONTAINER"
         docker rm "$PEER_CONTAINER"
         exit 1
@@ -77,11 +77,11 @@ while [[ $# -ge 1 ]] ; do
 done
 
 createIdentity() {
-    mkdir -p $PWD/../organizations/peerOrganizations/$ORG_NAME.com
+    mkdir -p $PWD/organizations/peerOrganizations/$ORG_NAME.com
     
-    export FABRIC_CA_CLIENT_HOME=$PWD/../organizations/peerOrganizations/$ORG_NAME.com
+    export FABRIC_CA_CLIENT_HOME=$PWD/organizations/peerOrganizations/$ORG_NAME.com
 
-    fabric-ca-client enroll -u https://$CA_SERVER_USERNAME:$CA_SERVER_PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/tls-cert.pem
+    fabric-ca-client enroll -u https://$CA_SERVER_USERNAME:$CA_SERVER_PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/tls-cert.pem
 
     echo "NodeOUs:
   Enable: true  
@@ -96,50 +96,50 @@ createIdentity() {
     OrganizationalUnitIdentifier: admin  
   OrdererOUIdentifier:
     Certificate: cacerts/$NODE_OU.pem    
-    OrganizationalUnitIdentifier: orderer" > "$PWD/../organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml"
+    OrganizationalUnitIdentifier: orderer" > "$PWD/organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml"
 
-    mkdir -p "$PWD/../organizations/peerOrganizations/$ORG_NAME.com/msp/tlscacerts"
+    mkdir -p "$PWD/organizations/peerOrganizations/$ORG_NAME.com/msp/tlscacerts"
 
-    cp "$PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem" "$PWD/../organizations/peerOrganizations/$ORG_NAME.com/msp/tlscacerts/ca.crt"
+    cp "$PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem" "$PWD/organizations/peerOrganizations/$ORG_NAME.com/msp/tlscacerts/ca.crt"
 
-    mkdir -p "$PWD/../organizations/peerOrganizations/$ORG_NAME.com/tlsca" 
+    mkdir -p "$PWD/organizations/peerOrganizations/$ORG_NAME.com/tlsca" 
 
-    cp "$PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem" "$PWD/../organizations/peerOrganizations/$ORG_NAME.com/tlsca/tlsca.$ORG_NAME.com-cert.pem"
+    cp "$PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem" "$PWD/organizations/peerOrganizations/$ORG_NAME.com/tlsca/tlsca.$ORG_NAME.com-cert.pem"
 
-    mkdir -p "$PWD/../organizations/peerOrganizations/$ORG_NAME.com/ca"
+    mkdir -p "$PWD/organizations/peerOrganizations/$ORG_NAME.com/ca"
 
-    cp $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem $PWD/../organizations/peerOrganizations/$ORG_NAME.com/ca/ca.$ORG_NAME.com-cert.pem
+    cp $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem $PWD/organizations/peerOrganizations/$ORG_NAME.com/ca/ca.$ORG_NAME.com-cert.pem
 
-    fabric-ca-client register --caname ca-$ORG_NAME --id.name $USERNAME --id.secret $PASSWORD --id.type peer --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/tls-cert.pem
+    fabric-ca-client register --caname ca-$ORG_NAME --id.name $USERNAME --id.secret $PASSWORD --id.type peer --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/tls-cert.pem
 
-    fabric-ca-client register --caname ca-$ORG_NAME --id.name "$USERNAME-user" --id.secret $PASSWORD --id.type client --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
+    fabric-ca-client register --caname ca-$ORG_NAME --id.name "$USERNAME-user" --id.secret $PASSWORD --id.type client --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
-    fabric-ca-client register --caname ca-$ORG_NAME --id.name "$USERNAME-admin" --id.secret $PASSWORD --id.type admin --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
+    fabric-ca-client register --caname ca-$ORG_NAME --id.name "$USERNAME-admin" --id.secret $PASSWORD --id.type admin --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
-    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/msp --csr.hosts $ORG_NAME.com --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
+    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/msp --csr.hosts $ORG_NAME.com --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
-    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/msp/config.yaml
+    cp $PWD/organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/msp/config.yaml
 
-    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls --enrollment.profile tls --csr.hosts $ORG_NAME.com --csr.hosts localhost --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
+    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls --enrollment.profile tls --csr.hosts $ORG_NAME.com --csr.hosts localhost --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
-    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/tlscacerts/* $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/ca.crt
+    cp $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/tlscacerts/* $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/ca.crt
 
-    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/signcerts/* $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/server.crt
+    cp $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/signcerts/* $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/server.crt
 
-    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/keystore/* $PWD/../organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/server.key
+    cp $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/keystore/* $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/server.key
 
-    fabric-ca-client enroll -u https://"$USERNAME-user":$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/../organizations/peerOrganizations/$ORG_NAME.com/users/User1@$ORG_NAME.com/msp --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
+    fabric-ca-client enroll -u https://"$USERNAME-user":$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/users/User1@$ORG_NAME.com/msp --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
-    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml $PWD/../organizations/peerOrganizations/$ORG_NAME.com/users/User1@$ORG_NAME.com/msp/config.yaml
+    cp $PWD/organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml $PWD/organizations/peerOrganizations/$ORG_NAME.com/users/User1@$ORG_NAME.com/msp/config.yaml
 
-    fabric-ca-client enroll -u https://"$USERNAME-admin":$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/../organizations/peerOrganizations/$ORG_NAME.com/users/Admin@$ORG_NAME.com/msp --tls.certfiles $PWD/../organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
+    fabric-ca-client enroll -u https://"$USERNAME-admin":$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/users/Admin@$ORG_NAME.com/msp --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
-    cp $PWD/../organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml $PWD/../organizations/peerOrganizations/$ORG_NAME.com/users/Admin@$ORG_NAME.com/msp/config.yaml
+    cp $PWD/organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml $PWD/organizations/peerOrganizations/$ORG_NAME.com/users/Admin@$ORG_NAME.com/msp/config.yaml
 
 }
 
 createCompose() {
-    mkdir -p $PWD/../organizations/compose/docker/peercfg
+    mkdir -p $PWD/organizations/compose/docker/peercfg
 
     ((inc = PEER_PORT + 1))
 
@@ -216,7 +216,7 @@ services:
     networks:
       - production
     
-" > "$PWD/../organizations/compose/peer-node.yaml"
+" > "$PWD/organizations/compose/peer-node.yaml"
 
 echo "version: '3.7'
 
@@ -247,7 +247,7 @@ services:
     volumes:
       - ./docker/peercfg:/etc/hyperledger/peercfg
   
-" > "$PWD/../organizations/compose/docker/peer-node.yaml"
+" > "$PWD/organizations/compose/docker/peer-node.yaml"
 
 
 echo "###############################################################################
@@ -1022,16 +1022,16 @@ metrics:
 
         # prefix is prepended to all emitted statsd metrics
         prefix:
-" > $PWD/../organizations/compose/docker/peercfg/core.yaml
+" > $PWD/organizations/compose/docker/peercfg/core.yaml
 
-cp $PWD/../organizations/compose/docker/peercfg/core.yaml $PWD/../organizations/config/core.yaml
+cp $PWD/organizations/compose/docker/peercfg/core.yaml $PWD/organizations/config/core.yaml
 
 }
 
 
-mkdir $PWD/../organizations $PWD/../organizations/config $PWD/../organizations/channel-artifacts
-export FABRIC_CFG_PATH=$PWD/../organizations/config
+mkdir $PWD/organizations $PWD/organizations/config $PWD/organizations/channel-artifacts
+export FABRIC_CFG_PATH=$PWD/organizations/config
 createIdentity
 createCompose
 export DOCKER_SOCK=/var/run/docker.sock
-docker compose -f $PWD/../organizations/compose/peer-node.yaml -f $PWD/../organizations/compose/docker/peer-node.yaml up -d
+docker compose -f $PWD/organizations/compose/peer-node.yaml -f $PWD/organizations/compose/docker/peer-node.yaml up -d

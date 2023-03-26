@@ -6,7 +6,7 @@ CA_OPERATION_PORT=$3
 CA_SERVER_ORDERER_PORT=$4
 CA_ORDERER_OPERATION_PORT=$5
 
-mkdir -p $PWD/../organizations/compose/ $PWD/../organizations
+mkdir -p $PWD/organizations/compose/ $PWD/organizations
 
 echo "
 version: '3.7'
@@ -58,6 +58,6 @@ services:
     container_name: ca_orderer_$ORG_NAME
     networks:
       - production
-" > $PWD/../organizations/compose/ca.yaml
+" > $PWD/organizations/compose/ca.yaml
 
-docker compose -f $PWD/../organizations/compose/ca.yaml up -d
+docker compose -f $PWD/organizations/compose/ca.yaml up -d

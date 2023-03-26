@@ -30,7 +30,7 @@ Organizations:
         # ID to load the MSP definition as
         ID: $(echo $ORG_NAME)MSP
 
-        MSPDir: $PWD/../organizations/peerOrganizations/$ORG_NAME.com/msp
+        MSPDir: $PWD/organizations/peerOrganizations/$ORG_NAME.com/msp
 
         Policies:
             Readers:
@@ -46,15 +46,15 @@ Organizations:
                 Type: Signature
                 Rule: \"OR('$(echo $ORG_NAME)MSP.peer')\"" > $CONFIGTX/configtx.yaml
 
-configtxgen -printOrg $(echo $ORG_NAME)MSP > $PWD/../organizations/peerOrganizations/$(echo $ORG_NAME).com/neworg.json
+configtxgen -printOrg $(echo $ORG_NAME)MSP > $PWD/organizations/peerOrganizations/$(echo $ORG_NAME).com/neworg.json
 
 export CORE_PEER_LOCALMSPID=$(echo $ORG_NAME)MSP
-export CORE_PEER_TLS_ROOTCERT_FILE=$PWD/../organizations/peerOrganizations/$(echo $ORG_NAME).com/tlsca/tlsca.$(echo $ORG_NAME).com-cert.pem
-export CORE_PEER_MSPCONFIGPATH=$PWD/../organizations/peerOrganizations/$(echo $ORG_NAME).com/users/Admin@$(echo $ORG_NAME).com/msp
+export CORE_PEER_TLS_ROOTCERT_FILE=$PWD/organizations/peerOrganizations/$(echo $ORG_NAME).com/tlsca/tlsca.$(echo $ORG_NAME).com-cert.pem
+export CORE_PEER_MSPCONFIGPATH=$PWD/organizations/peerOrganizations/$(echo $ORG_NAME).com/users/Admin@$(echo $ORG_NAME).com/msp
 export CORE_PEER_ADDRESS=localhost:$PEER_PORT
 export CORE_PEER_TLS_ENABLED=true
 
-export ORDERER_CA=$PWD/../organizations/orderer/tlsca.orderer.$OTHER_ORG_NAME.com-cert.pem
+export ORDERER_CA=$PWD/organizations/orderer/tlsca.orderer.$OTHER_ORG_NAME.com-cert.pem
 
 }
 
@@ -71,7 +71,7 @@ echo "Organizations:
     ID: Orderer$(echo $ORG_NAME)MSP
 
     # MSPDir is the filesystem path which contains the MSP configuration
-    MSPDir: $PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/msp
+    MSPDir: $PWD/organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/msp
 
     # Policies defines the set of policies at this level of the config tree
     # For organization policies, their canonical path is usually
@@ -90,15 +90,15 @@ echo "Organizations:
     OrdererEndpoints:
       - orderer.$ORG_NAME.com:$ORDERER_GENERAL_PORT" > $CONFIGTX/configtx.yaml
 
-configtxgen -printOrg Orderer$(echo $ORG_NAME)Org > $PWD/../organizations/ordererOrganizations/orderer.$ORG_NAME.com/neworg.json
+configtxgen -printOrg Orderer$(echo $ORG_NAME)Org > $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/neworg.json
 
 export CORE_PEER_LOCALMSPID=Orderer$(echo $ORG_NAME)MSP
-export CORE_PEER_TLS_ROOTCERT_FILE=$PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/ca.crt
-export CORE_PEER_MSPCONFIGPATH=$PWD/../organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/users/Admin@orderer.$(echo $ORG_NAME).com/msp
+export CORE_PEER_TLS_ROOTCERT_FILE=$PWD/organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=$PWD/organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/users/Admin@orderer.$(echo $ORG_NAME).com/msp
 export CORE_PEER_ADDRESS=localhost:$ORDERER_GENERAL_PORT
 export CORE_PEER_TLS_ENABLED=true
 
-export ORDERER_CA=$PWD/../organizations/orderer/tlsca.orderer.$OTHER_ORG_NAME.com-cert.pem
+export ORDERER_CA=$PWD/organizations/orderer/tlsca.orderer.$OTHER_ORG_NAME.com-cert.pem
 
 }
 
@@ -111,25 +111,25 @@ else
     exit 1
 fi
 
-cp $PWD/../organizations/config/core.yaml $CONFIGTX/core.yaml
+cp $PWD/organizations/config/core.yaml $CONFIGTX/core.yaml
 
 # convert pb to json and extract the needed data only
-configtxlator proto_decode --input $PWD/../organizations/channel-artifacts/config_block.pb --type common.Block --output $PWD/../organizations/channel-artifacts/config_block.json
+configtxlator proto_decode --input $PWD/organizations/channel-artifacts/config_block.pb --type common.Block --output $PWD/organizations/channel-artifacts/config_block.json
 
-jq ".data.data[0].payload.data.config" $PWD/../organizations/channel-artifacts/config_block.json > $PWD/../organizations/channel-artifacts/config.json
+jq ".data.data[0].payload.data.config" $PWD/organizations/channel-artifacts/config_block.json > $PWD/organizations/channel-artifacts/config.json
 
 addToJsonPeer() {
-jq -s '.[0] * {"channel_group":{"groups":{"Application":{"groups": {"'$(echo $ORG_NAME)'MSP":.[1]}}}}}' $PWD/../organizations/channel-artifacts/config.json $PWD/../organizations/peerOrganizations/$ORG_NAME.com/neworg.json > $PWD/../organizations/channel-artifacts/modified_config.json
+jq -s '.[0] * {"channel_group":{"groups":{"Application":{"groups": {"'$(echo $ORG_NAME)'MSP":.[1]}}}}}' $PWD/organizations/channel-artifacts/config.json $PWD/organizations/peerOrganizations/$ORG_NAME.com/neworg.json > $PWD/organizations/channel-artifacts/modified_config.json
 }
 
 addToJsonOrderer() {
-jq -s '.[0] * {"channel_group":{"groups":{"Orderer":{"groups": {"Orderer'$(echo $ORG_NAME)'MSP":.[1]}}}}}' $PWD/../organizations/channel-artifacts/config.json $PWD/../organizations/ordererOrganizations/orderer.$ORG_NAME.com/neworg.json > $PWD/../organizations/channel-artifacts/pre_modified_config.json
+jq -s '.[0] * {"channel_group":{"groups":{"Orderer":{"groups": {"Orderer'$(echo $ORG_NAME)'MSP":.[1]}}}}}' $PWD/organizations/channel-artifacts/config.json $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/neworg.json > $PWD/organizations/channel-artifacts/pre_modified_config.json
 
-export CERT=`base64 $PWD/../organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/tls/server.crt | sed ':a;N;$!ba;s/\n//g'`
+export CERT=`base64 $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/tls/server.crt | sed ':a;N;$!ba;s/\n//g'`
 
-cat $PWD/../organizations/channel-artifacts/pre_modified_config.json | jq '.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters += [{"client_tls_cert":"'$CERT'", "host":"orderer.'$ORG_NAME'.com", "port": '$ORDERER_GENERAL_PORT',"server_tls_cert":"'$CERT'"}]' > $PWD/../organizations/channel-artifacts/pre_med_modified_config.json
+cat $PWD/organizations/channel-artifacts/pre_modified_config.json | jq '.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters += [{"client_tls_cert":"'$CERT'", "host":"orderer.'$ORG_NAME'.com", "port": '$ORDERER_GENERAL_PORT',"server_tls_cert":"'$CERT'"}]' > $PWD/organizations/channel-artifacts/pre_med_modified_config.json
 
-cat $PWD/../organizations/channel-artifacts/pre_med_modified_config.json | jq '.channel_group.values.OrdererAddresses.value.addresses += ["orderer.'$ORG_NAME'.com:'$ORDERER_GENERAL_PORT'"]' > $PWD/../organizations/channel-artifacts/modified_config.json
+cat $PWD/organizations/channel-artifacts/pre_med_modified_config.json | jq '.channel_group.values.OrdererAddresses.value.addresses += ["orderer.'$ORG_NAME'.com:'$ORDERER_GENERAL_PORT'"]' > $PWD/organizations/channel-artifacts/modified_config.json
 
 }
 
@@ -145,23 +145,23 @@ fi
 
 
 # convert back the config.json to .pb
-configtxlator proto_encode --input $PWD/../organizations/channel-artifacts/config.json --type common.Config --output $PWD/../organizations/channel-artifacts/config.pb
+configtxlator proto_encode --input $PWD/organizations/channel-artifacts/config.json --type common.Config --output $PWD/organizations/channel-artifacts/config.pb
 
 # conver the modified_config.json to .pb 
-configtxlator proto_encode --input $PWD/../organizations/channel-artifacts/modified_config.json --type common.Config --output $PWD/../organizations/channel-artifacts/modified_config.pb
+configtxlator proto_encode --input $PWD/organizations/channel-artifacts/modified_config.json --type common.Config --output $PWD/organizations/channel-artifacts/modified_config.pb
 
 # calculate the delta of the two .pb generated previously and output the updated configuration 
-configtxlator compute_update --channel_id $CHANNEL_ID --original $PWD/../organizations/channel-artifacts/config.pb --updated $PWD/../organizations/channel-artifacts/modified_config.pb --output $PWD/../organizations/channel-artifacts/_update.pb
+configtxlator compute_update --channel_id $CHANNEL_ID --original $PWD/organizations/channel-artifacts/config.pb --updated $PWD/organizations/channel-artifacts/modified_config.pb --output $PWD/organizations/channel-artifacts/_update.pb
 
 # convert the _update.json to .json
-configtxlator proto_decode --input $PWD/../organizations/channel-artifacts/_update.pb --type common.ConfigUpdate --output $PWD/../organizations/channel-artifacts/_update.json
+configtxlator proto_decode --input $PWD/organizations/channel-artifacts/_update.pb --type common.ConfigUpdate --output $PWD/organizations/channel-artifacts/_update.json
 
 # wrap it in envelope which should have the header to know it is for update
 
-echo '{"payload":{"header":{"channel_header":{"channel_id":"'$(echo $CHANNEL_ID)'", "type":2}},"data":{"config_update":'$(cat $PWD/../organizations/channel-artifacts/_update.json)'}}}' | jq . > $PWD/../organizations/channel-artifacts/_update_in_envelope.json
+echo '{"payload":{"header":{"channel_header":{"channel_id":"'$(echo $CHANNEL_ID)'", "type":2}},"data":{"config_update":'$(cat $PWD/organizations/channel-artifacts/_update.json)'}}}' | jq . > $PWD/organizations/channel-artifacts/_update_in_envelope.json
 
 # now, convert the  update to .pb envelope
-configtxlator proto_encode --input $PWD/../organizations/channel-artifacts/_update_in_envelope.json --type common.Envelope --output $PWD/../organizations/channel-artifacts/_update_in_envelope.pb
+configtxlator proto_encode --input $PWD/organizations/channel-artifacts/_update_in_envelope.json --type common.Envelope --output $PWD/organizations/channel-artifacts/_update_in_envelope.pb
 
 
 # # export these environment variables in peer to be leader of gossip protocol
