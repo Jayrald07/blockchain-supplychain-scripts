@@ -18,7 +18,7 @@ export FABRIC_CA_CLIENT_HOME=$PWD/organizations/ordererOrganizations/orderer.$(e
 
 # Create Orgs and Orderer Identities
 # At first, only admin are needed to be enrolled
-fabric-ca-client enroll -u https://$CA_ORDERER_USERNAME:$CA_ORDERER_PASSWORD@localhost:$CA_ORDERER_PORT --caname ca-orderer-$ORG_NAME --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/tls-cert.pem
+fabric-ca-client enroll -u https://$CA_ORDERER_USERNAME:$CA_ORDERER_PASSWORD@ca_orderer_$ORG_NAME.com:$CA_ORDERER_PORT --caname ca-orderer-$ORG_NAME --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/tls-cert.pem
 
 echo "
 version: \"3.7\"
@@ -64,8 +64,8 @@ services:
     working_dir: /root
     command: orderer
     volumes:
-      - ../ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/msp:/var/hyperledger/orderer/msp
-      - ../ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/tls/:/var/hyperledger/orderer/tls
+      - /var/lib/docker/volumes/$NODE_ID/_data/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/msp:/var/hyperledger/orderer/msp
+      - /var/lib/docker/volumes/$NODE_ID/_data/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/tls/:/var/hyperledger/orderer/tls
       - orderer.$ORG_NAME.com:/var/hyperledger/production/orderer
     ports:
       - $GENERAL:$GENERAL
@@ -81,16 +81,16 @@ services:
 echo "NodeOUs:
   Enable: true  
   ClientOUIdentifier:    
-    Certificate: cacerts/localhost-$CA_ORDERER_PORT-ca-orderer-$ORG_NAME.pem    
+    Certificate: cacerts/ca_orderer_$ORG_NAME-com-$CA_ORDERER_PORT-ca-orderer-$ORG_NAME.pem    
     OrganizationalUnitIdentifier: client  
   PeerOUIdentifier:
-    Certificate: cacerts/localhost-$CA_ORDERER_PORT-ca-orderer-$ORG_NAME.pem    
+    Certificate: cacerts/ca_orderer_$ORG_NAME-com-$CA_ORDERER_PORT-ca-orderer-$ORG_NAME.pem    
     OrganizationalUnitIdentifier: peer
   AdminOUIdentifier:
-    Certificate: cacerts/localhost-$CA_ORDERER_PORT-ca-orderer-$ORG_NAME.pem   
+    Certificate: cacerts/ca_orderer_$ORG_NAME-com-$CA_ORDERER_PORT-ca-orderer-$ORG_NAME.pem   
     OrganizationalUnitIdentifier: admin  
   OrdererOUIdentifier:
-    Certificate: cacerts/localhost-$CA_ORDERER_PORT-ca-orderer-$ORG_NAME.pem    
+    Certificate: cacerts/ca_orderer_$ORG_NAME-com-$CA_ORDERER_PORT-ca-orderer-$ORG_NAME.pem    
     OrganizationalUnitIdentifier: orderer" > "$PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/msp/config.yaml"
 
 mkdir -p $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/msp/tlscacerts
@@ -108,11 +108,11 @@ fabric-ca-client register --caname ca-orderer-$ORG_NAME --id.name ordererv7 --id
 
 fabric-ca-client register --caname ca-orderer-$ORG_NAME --id.name ordererAdminv7 --id.secret ordererAdminv4pw --id.type admin --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/ca-cert.pem
 
-fabric-ca-client enroll -u https://ordererv7:ordererv4pw@localhost:$CA_ORDERER_PORT --caname ca-orderer-$ORG_NAME -M $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/msp --csr.hosts orderer.$ORG_NAME.com --csr.hosts localhost --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/ca-cert.pem
+fabric-ca-client enroll -u https://ordererv7:ordererv4pw@ca_orderer_$ORG_NAME.com:$CA_ORDERER_PORT --caname ca-orderer-$ORG_NAME -M $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/msp --csr.hosts orderer.$ORG_NAME.com --csr.hosts localhost --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/ca-cert.pem
 
 cp $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/msp/config.yaml $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/msp/config.yaml
 
-fabric-ca-client enroll -u https://ordererv7:ordererv4pw@localhost:$CA_ORDERER_PORT --caname ca-orderer-$ORG_NAME -M $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/tls --enrollment.profile tls --csr.hosts orderer.$ORG_NAME.com --csr.hosts localhost --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/ca-cert.pem
+fabric-ca-client enroll -u https://ordererv7:ordererv4pw@ca_orderer_$ORG_NAME.com:$CA_ORDERER_PORT --caname ca-orderer-$ORG_NAME -M $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/tls --enrollment.profile tls --csr.hosts orderer.$ORG_NAME.com --csr.hosts localhost --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/ca-cert.pem
 
 cp $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/tls/tlscacerts/* $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/tls/ca.crt
 
@@ -124,7 +124,7 @@ mkdir -p $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/
 
 cp $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/tls/tlscacerts/* $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/msp/tlscacerts/tlsca.example.com-cert.pem
 
-fabric-ca-client enroll -u https://ordererAdminv7:ordererAdminv4pw@localhost:$CA_ORDERER_PORT --caname ca-orderer-$ORG_NAME -M $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/users/Admin@orderer.$ORG_NAME.com/msp --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/ca-cert.pem
+fabric-ca-client enroll -u https://ordererAdminv7:ordererAdminv4pw@ca_orderer_$ORG_NAME.com:$CA_ORDERER_PORT --caname ca-orderer-$ORG_NAME -M $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/users/Admin@orderer.$ORG_NAME.com/msp --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/ca-cert.pem
 
 cp $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/msp/config.yaml $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/users/Admin@orderer.$ORG_NAME.com/msp/config.yaml
 

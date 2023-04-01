@@ -28,12 +28,13 @@ services:
       - FABRIC_CA_SERVER_TLS_ENABLED=true
       - FABRIC_CA_SERVER_PORT=$CA_SERVER_PORT
       - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=0.0.0.0:$CA_OPERATION_PORT
+      - FABRIC_CA_SERVER_CSR_HOSTS=ca_$ORG_NAME.com
     ports:
       - $CA_SERVER_PORT:$CA_SERVER_PORT
       - $CA_OPERATION_PORT:$CA_OPERATION_PORT
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
-      - ../fabric-ca/$ORG_NAME.com:/etc/hyperledger/fabric-ca-server
+      - /var/lib/docker/volumes/$NODE_ID/_data/organizations/fabric-ca/$ORG_NAME.com:/etc/hyperledger/fabric-ca-server
     container_name: ca_$ORG_NAME
     networks:
       - production
@@ -49,12 +50,13 @@ services:
       - FABRIC_CA_SERVER_TLS_ENABLED=true
       - FABRIC_CA_SERVER_PORT=$CA_SERVER_ORDERER_PORT
       - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=0.0.0.0:$CA_ORDERER_OPERATION_PORT
+      - FABRIC_CA_SERVER_CSR_HOSTS=ca_orderer_$ORG_NAME.com
     ports:
       - $CA_SERVER_ORDERER_PORT:$CA_SERVER_ORDERER_PORT
       - $CA_ORDERER_OPERATION_PORT:$CA_ORDERER_OPERATION_PORT
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
-      - ../fabric-ca/orderer$ORG_NAME.com:/etc/hyperledger/fabric-ca-server
+      - /var/lib/docker/volumes/$NODE_ID/_data/organizations/fabric-ca/orderer$ORG_NAME.com:/etc/hyperledger/fabric-ca-server
     container_name: ca_orderer_$ORG_NAME
     networks:
       - production

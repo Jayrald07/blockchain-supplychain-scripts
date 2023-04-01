@@ -37,7 +37,7 @@ while [[ $# -ge 1 ]] ; do
         ;;
     --ca-port )
         CA_PORT="$2"
-        NODE_OU="localhost-$CA_PORT-ca-$ORG_NAME"
+        NODE_OU="ca_$ORG_NAME-com-$CA_PORT-ca-$ORG_NAME"
         shift
         ;;
     --ca-orderer-username )
@@ -81,7 +81,7 @@ createIdentity() {
     
     export FABRIC_CA_CLIENT_HOME=$PWD/organizations/peerOrganizations/$ORG_NAME.com
 
-    fabric-ca-client enroll -u https://$CA_SERVER_USERNAME:$CA_SERVER_PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/tls-cert.pem
+    fabric-ca-client enroll -u https://$CA_SERVER_USERNAME:$CA_SERVER_PASSWORD@ca_$ORG_NAME.com:$CA_PORT --caname ca-$ORG_NAME --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/tls-cert.pem
 
     echo "NodeOUs:
   Enable: true  
@@ -116,11 +116,11 @@ createIdentity() {
 
     fabric-ca-client register --caname ca-$ORG_NAME --id.name "$USERNAME-admin" --id.secret $PASSWORD --id.type admin --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
-    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/msp --csr.hosts $ORG_NAME.com --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
+    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@ca_$ORG_NAME.com:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/msp --csr.hosts $ORG_NAME.com --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
     cp $PWD/organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/msp/config.yaml
 
-    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls --enrollment.profile tls --csr.hosts $ORG_NAME.com --csr.hosts localhost --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
+    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@ca_$ORG_NAME.com:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls --enrollment.profile tls --csr.hosts $ORG_NAME.com --csr.hosts localhost --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
     cp $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/tlscacerts/* $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/ca.crt
 
@@ -128,11 +128,11 @@ createIdentity() {
 
     cp $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/keystore/* $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/server.key
 
-    fabric-ca-client enroll -u https://"$USERNAME-user":$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/users/User1@$ORG_NAME.com/msp --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
+    fabric-ca-client enroll -u https://"$USERNAME-user":$PASSWORD@ca_$ORG_NAME.com:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/users/User1@$ORG_NAME.com/msp --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
     cp $PWD/organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml $PWD/organizations/peerOrganizations/$ORG_NAME.com/users/User1@$ORG_NAME.com/msp/config.yaml
 
-    fabric-ca-client enroll -u https://"$USERNAME-admin":$PASSWORD@localhost:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/users/Admin@$ORG_NAME.com/msp --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
+    fabric-ca-client enroll -u https://"$USERNAME-admin":$PASSWORD@ca_$ORG_NAME.com:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/users/Admin@$ORG_NAME.com/msp --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
     cp $PWD/organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml $PWD/organizations/peerOrganizations/$ORG_NAME.com/users/Admin@$ORG_NAME.com/msp/config.yaml
 
@@ -184,7 +184,7 @@ services:
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={\"peername\":\"peer0org1\"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s      
     volumes:
-      - ../peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com:/etc/hyperledger/fabric        
+      - /var/lib/docker/volumes/$NODE_ID/_data/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com:/etc/hyperledger/fabric        
       - $ORG_NAME.com:/var/hyperledger/production
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
@@ -209,8 +209,8 @@ services:
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: /bin/bash
     volumes:
-      - ../:/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations
-      - ../../scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
+      - /var/lib/docker/volumes/$NODE_ID/_data/organizations:/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations
+      - /var/lib/docker/volumes/$NODE_ID/_data/organizations/scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
     depends_on:
       - $ORG_NAME.com
     networks:
@@ -237,7 +237,7 @@ services:
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=blockchain_network
     volumes:
-      - ./docker/peercfg:/etc/hyperledger/peercfg
+      - /var/lib/docker/volumes/$NODE_ID/_data/organizations/compose/docker/peercfg:/etc/hyperledger/peercfg
       - \${DOCKER_SOCK}:/host/var/run/docker.sock
 
   cli.$ORG_NAME.com:
@@ -245,7 +245,7 @@ services:
     image: hyperledger/fabric-tools:2.4.7
     restart: always
     volumes:
-      - ./docker/peercfg:/etc/hyperledger/peercfg
+      - /var/lib/docker/volumes/$NODE_ID/_data/organizations/compose/docker/peercfg:/etc/hyperledger/peercfg
   
 " > "$PWD/organizations/compose/docker/peer-node.yaml"
 
