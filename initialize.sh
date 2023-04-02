@@ -210,7 +210,7 @@ services:
     command: /bin/bash
     volumes:
       - /var/lib/docker/volumes/$NODE_ID/_data/organizations:/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations
-      - /var/lib/docker/volumes/$NODE_ID/_data/organizations/scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
+      - /var/lib/docker/volumes/$NODE_ID/_data/scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
     depends_on:
       - $ORG_NAME.com
     networks:
