@@ -20,7 +20,11 @@ export CORE_PEER_TLS_ENABLED=true
 
 # peer channel getinfo -c $CHANNEL_ID
 
+sleep 5s
+
 peer channel fetch 0 $PWD/organizations/channel-artifacts/mychannel.block -o orderer.$OTHER_ORG_NAME.com:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.$OTHER_ORG_NAME.com -c $CHANNEL_ID --tls --cafile $ORDERER_CA
+
+sleep 2s
 
 # # join the current org
 peer channel join -b $PWD/organizations/channel-artifacts/mychannel.block
