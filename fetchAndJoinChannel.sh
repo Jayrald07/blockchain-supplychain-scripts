@@ -24,7 +24,8 @@ export CORE_PEER_TLS_ENABLED=true
 
 sleep 5s
 
-peer channel fetch 0 $PWD/organizations/channel-artifacts/mychannel.block -o $OTHER_SERVER_IP:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.$OTHER_ORG_NAME.com -c $CHANNEL_ID --tls --cafile $ORDERER_CA
+# peer channel fetch 0 $PWD/organizations/channel-artifacts/mychannel.block -o $OTHER_SERVER_IP:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.$OTHER_ORG_NAME.com -c $CHANNEL_ID --tls --cafile $ORDERER_CA
+peer channel fetch 0 $PWD/organizations/channel-artifacts/mychannel.block -o $OTHER_SERVER_IP:$ORDERER_GENERAL_PORT -c $CHANNEL_ID --tls --cafile $ORDERER_CA
 
 sleep 2s
 

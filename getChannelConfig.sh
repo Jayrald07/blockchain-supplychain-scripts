@@ -12,8 +12,9 @@ export ORDERER_CA=$PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/
 export CORE_PEER_LOCALMSPID=$(echo $ORG_NAME)MSP
 export CORE_PEER_TLS_ROOTCERT_FILE=$PWD/organizations/peerOrganizations/$(echo $ORG_NAME).com/tlsca/tlsca.$(echo $ORG_NAME).com-cert.pem
 export CORE_PEER_MSPCONFIGPATH=$PWD/organizations/peerOrganizations/$(echo $ORG_NAME).com/users/Admin@$(echo $ORG_NAME).com/msp
-export CORE_PEER_ADDRESS=localhost:$PEER_PORT
+export CORE_PEER_ADDRESS=$SERVER_IP:$PEER_PORT
 export CORE_PEER_TLS_ENABLED=true
 
 # fetch the channel config 
-peer channel fetch config $PWD/organizations/channel-artifacts/config_block.pb -o $SERVER_IP:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.$ORG_NAME.com -c $CHANNEL_ID --tls --cafile ${ORDERER_CA}
+# peer channel fetch config $PWD/organizations/channel-artifacts/config_block.pb -o $SERVER_IP:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.$ORG_NAME.com -c $CHANNEL_ID --tls --cafile ${ORDERER_CA}
+peer channel fetch config $PWD/organizations/channel-artifacts/config_block.pb -o $SERVER_IP:$ORDERER_GENERAL_PORT -c $CHANNEL_ID --tls --cafile ${ORDERER_CA}
