@@ -12,6 +12,7 @@ PASSWORD=""
 PEER_PORT=0
 NODE_OU=""
 MSP=""
+SERVER_IP=""
 
 while [[ $# -ge 1 ]] ; do
     arg="$1"
@@ -21,6 +22,10 @@ while [[ $# -ge 1 ]] ; do
         docker stop "$PEER_CONTAINER"
         docker rm "$PEER_CONTAINER"
         exit 1
+        ;;
+    --server-ip )
+        SERVER_IP="$2"
+        shift
         ;;
     --on )
         ORG_NAME="$2"
@@ -81,7 +86,7 @@ createIdentity() {
     
     export FABRIC_CA_CLIENT_HOME=$PWD/organizations/peerOrganizations/$ORG_NAME.com
 
-    fabric-ca-client enroll -u https://$CA_SERVER_USERNAME:$CA_SERVER_PASSWORD@ca_$ORG_NAME.com:$CA_PORT --caname ca-$ORG_NAME --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/tls-cert.pem
+    fabric-ca-client enroll -u https://$CA_SERVER_USERNAME:$CA_SERVER_PASSWORD@$SERVER_IP:$CA_PORT --caname ca-$ORG_NAME --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/tls-cert.pem
 
     echo "NodeOUs:
   Enable: true  
@@ -116,11 +121,13 @@ createIdentity() {
 
     fabric-ca-client register --caname ca-$ORG_NAME --id.name "$USERNAME-admin" --id.secret $PASSWORD --id.type admin --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
-    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@ca_$ORG_NAME.com:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/msp --csr.hosts $ORG_NAME.com --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
+    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@$SERVER_IP:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/msp --csr.hosts $SERVER_IP --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
     cp $PWD/organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/msp/config.yaml
 
-    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@ca_$ORG_NAME.com:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls --enrollment.profile tls --csr.hosts $ORG_NAME.com --csr.hosts localhost --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
+    # fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@ca_$ORG_NAME.com:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls --enrollment.profile tls --csr.hosts $ORG_NAME.com --csr.hosts $SERVER_IP --csr.hosts localhost --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
+
+    fabric-ca-client enroll -u https://$USERNAME:$PASSWORD@$SERVER_IP:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls --enrollment.profile tls --csr.hosts $SERVER_IP --csr.hosts localhost --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
     cp $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/tlscacerts/* $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/ca.crt
 
@@ -128,11 +135,11 @@ createIdentity() {
 
     cp $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/keystore/* $PWD/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com/tls/server.key
 
-    fabric-ca-client enroll -u https://"$USERNAME-user":$PASSWORD@ca_$ORG_NAME.com:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/users/User1@$ORG_NAME.com/msp --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
+    fabric-ca-client enroll -u https://"$USERNAME-user":$PASSWORD@$SERVER_IP:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/users/User1@$ORG_NAME.com/msp --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
     cp $PWD/organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml $PWD/organizations/peerOrganizations/$ORG_NAME.com/users/User1@$ORG_NAME.com/msp/config.yaml
 
-    fabric-ca-client enroll -u https://"$USERNAME-admin":$PASSWORD@ca_$ORG_NAME.com:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/users/Admin@$ORG_NAME.com/msp --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
+    fabric-ca-client enroll -u https://"$USERNAME-admin":$PASSWORD@$SERVER_IP:$CA_PORT --caname ca-$ORG_NAME -M $PWD/organizations/peerOrganizations/$ORG_NAME.com/users/Admin@$ORG_NAME.com/msp --tls.certfiles $PWD/organizations/fabric-ca/$ORG_NAME.com/ca-cert.pem
 
     cp $PWD/organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml $PWD/organizations/peerOrganizations/$ORG_NAME.com/users/Admin@$ORG_NAME.com/msp/config.yaml
 
@@ -171,14 +178,14 @@ services:
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
       # Peer specific variables
-      - CORE_PEER_ID=$ORG_NAME.com
-      - CORE_PEER_ADDRESS=$ORG_NAME.com:$PEER_PORT
+      - CORE_PEER_ID=$SERVER_IP
+      - CORE_PEER_ADDRESS=$SERVER_IP:$PEER_PORT
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
       - CORE_PEER_LISTENADDRESS=0.0.0.0:$PEER_PORT
-      - CORE_PEER_CHAINCODEADDRESS=$ORG_NAME.com:$inc
+      - CORE_PEER_CHAINCODEADDRESS=$SERVER_IP:$inc
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:$inc
-      - CORE_PEER_GOSSIP_BOOTSTRAP=$ORG_NAME.com:$PEER_PORT
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=$ORG_NAME.com:$PEER_PORT
+      - CORE_PEER_GOSSIP_BOOTSTRAP=$SERVER_IP:$PEER_PORT
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=$SERVER_IP:$PEER_PORT
       - CORE_PEER_LOCALMSPID=$(echo $ORG_NAME)MSP
       - CORE_METRICS_PROVIDER=prometheus
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={\"peername\":\"peer0org1\"}
@@ -345,7 +352,7 @@ peer:
         # Important: The endpoints here have to be endpoints of peers in the same
         # organization, because the peer would refuse connecting to these endpoints
         # unless they are in the same organization as the peer.
-        bootstrap: 127.0.0.1:$PEER_PORT
+        bootstrap: $SERVER_IP:$PEER_PORT
 
         # NOTE: orgLeader and useLeaderElection parameters are mutual exclusive.
         # Setting both to true would result in the termination of the peer

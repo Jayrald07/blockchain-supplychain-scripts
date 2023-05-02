@@ -6,7 +6,7 @@ PEER_PORT=$3
 CHANNEL_ID=$4
 ORG_TYPE=$5
 ORDERER_GENERAL_PORT=$6 # PORT of new peer
-
+SERVER_IP=$7
 CONFIGTX=$(mktemp -d)
 
 # This needs configtx.yaml which should be presented in FABRIC_CFG_PATH
@@ -51,7 +51,7 @@ configtxgen -printOrg $(echo $ORG_NAME)MSP > $PWD/organizations/peerOrganization
 export CORE_PEER_LOCALMSPID=$(echo $ORG_NAME)MSP
 export CORE_PEER_TLS_ROOTCERT_FILE=$PWD/organizations/peerOrganizations/$(echo $ORG_NAME).com/tlsca/tlsca.$(echo $ORG_NAME).com-cert.pem
 export CORE_PEER_MSPCONFIGPATH=$PWD/organizations/peerOrganizations/$(echo $ORG_NAME).com/users/Admin@$(echo $ORG_NAME).com/msp
-export CORE_PEER_ADDRESS=$ORG_NAME.com:$PEER_PORT
+export CORE_PEER_ADDRESS=$SERVER_IP:$PEER_PORT
 export CORE_PEER_TLS_ENABLED=true
 
 export ORDERER_CA=$PWD/organizations/orderer/tlsca.orderer.$OTHER_ORG_NAME.com-cert.pem
@@ -88,14 +88,14 @@ echo "Organizations:
         Rule: \"OR('Orderer$(echo $ORG_NAME)MSP.admin')\"
 
     OrdererEndpoints:
-      - orderer.$ORG_NAME.com:$ORDERER_GENERAL_PORT" > $CONFIGTX/configtx.yaml
+      - $SERVER_IP:$ORDERER_GENERAL_PORT" > $CONFIGTX/configtx.yaml
 
 configtxgen -printOrg Orderer$(echo $ORG_NAME)Org > $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/neworg.json
 
 export CORE_PEER_LOCALMSPID=Orderer$(echo $ORG_NAME)MSP
 export CORE_PEER_TLS_ROOTCERT_FILE=$PWD/organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/ca.crt
 export CORE_PEER_MSPCONFIGPATH=$PWD/organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/users/Admin@orderer.$(echo $ORG_NAME).com/msp
-export CORE_PEER_ADDRESS=$ORG_NAME.com:$ORDERER_GENERAL_PORT
+export CORE_PEER_ADDRESS=$SERVER_IP:$ORDERER_GENERAL_PORT
 export CORE_PEER_TLS_ENABLED=true
 
 export ORDERER_CA=$PWD/organizations/orderer/tlsca.orderer.$OTHER_ORG_NAME.com-cert.pem
@@ -127,9 +127,9 @@ jq -s '.[0] * {"channel_group":{"groups":{"Orderer":{"groups": {"Orderer'$(echo 
 
 export CERT=`base64 $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/tls/server.crt | sed ':a;N;$!ba;s/\n//g'`
 
-cat $PWD/organizations/channel-artifacts/pre_modified_config.json | jq '.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters += [{"client_tls_cert":"'$CERT'", "host":"orderer.'$ORG_NAME'.com", "port": '$ORDERER_GENERAL_PORT',"server_tls_cert":"'$CERT'"}]' > $PWD/organizations/channel-artifacts/pre_med_modified_config.json
+cat $PWD/organizations/channel-artifacts/pre_modified_config.json | jq '.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters += [{"client_tls_cert":"'$CERT'", "host":"'$SERVER_IP'", "port": '$ORDERER_GENERAL_PORT',"server_tls_cert":"'$CERT'"}]' > $PWD/organizations/channel-artifacts/pre_med_modified_config.json
 
-cat $PWD/organizations/channel-artifacts/pre_med_modified_config.json | jq '.channel_group.values.OrdererAddresses.value.addresses += ["orderer.'$ORG_NAME'.com:'$ORDERER_GENERAL_PORT'"]' > $PWD/organizations/channel-artifacts/modified_config.json
+cat $PWD/organizations/channel-artifacts/pre_med_modified_config.json | jq '.channel_group.values.OrdererAddresses.value.addresses += ['$SERVER_IP':'$ORDERER_GENERAL_PORT'"]' > $PWD/organizations/channel-artifacts/modified_config.json
 
 }
 

@@ -9,6 +9,7 @@ OPERATIONS=$4
 CA_ORDERER_USERNAME=$5
 CA_ORDERER_PASSWORD=$6
 CA_ORDERER_PORT=$7
+SERVER_IP=$8
 
 mkdir -p $PWD/organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com
 
@@ -18,7 +19,7 @@ export FABRIC_CA_CLIENT_HOME=$PWD/organizations/ordererOrganizations/orderer.$(e
 
 # Create Orgs and Orderer Identities
 # At first, only admin are needed to be enrolled
-fabric-ca-client enroll -u https://$CA_ORDERER_USERNAME:$CA_ORDERER_PASSWORD@ca_orderer_$ORG_NAME.com:$CA_ORDERER_PORT --caname ca-orderer-$ORG_NAME --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/tls-cert.pem
+fabric-ca-client enroll -u https://$CA_ORDERER_USERNAME:$CA_ORDERER_PASSWORD@$SERVER_IP:$CA_ORDERER_PORT --caname ca-orderer-$ORG_NAME --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/tls-cert.pem
 
 echo "
 version: \"3.7\"
@@ -59,7 +60,7 @@ services:
       - ORDERER_ADMIN_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
       - ORDERER_ADMIN_TLS_CLIENTROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
       - ORDERER_ADMIN_LISTENADDRESS=0.0.0.0:$ADMIN
-      - ORDERER_OPERATIONS_LISTENADDRESS=orderer.$ORG_NAME.com:$OPERATIONS
+      - ORDERER_OPERATIONS_LISTENADDRESS=0.0.0.0:$OPERATIONS
       - ORDERER_METRICS_PROVIDER=prometheus
     working_dir: /root
     command: orderer
@@ -108,11 +109,11 @@ fabric-ca-client register --caname ca-orderer-$ORG_NAME --id.name ordererv7 --id
 
 fabric-ca-client register --caname ca-orderer-$ORG_NAME --id.name ordererAdminv7 --id.secret ordererAdminv4pw --id.type admin --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/ca-cert.pem
 
-fabric-ca-client enroll -u https://ordererv7:ordererv4pw@ca_orderer_$ORG_NAME.com:$CA_ORDERER_PORT --caname ca-orderer-$ORG_NAME -M $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/msp --csr.hosts orderer.$ORG_NAME.com --csr.hosts localhost --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/ca-cert.pem
+fabric-ca-client enroll -u https://ordererv7:ordererv4pw@$SERVER_IP:$CA_ORDERER_PORT --caname ca-orderer-$ORG_NAME -M $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/msp --csr.hosts $SERVER_IP --csr.hosts localhost --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/ca-cert.pem
 
 cp $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/msp/config.yaml $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/msp/config.yaml
 
-fabric-ca-client enroll -u https://ordererv7:ordererv4pw@ca_orderer_$ORG_NAME.com:$CA_ORDERER_PORT --caname ca-orderer-$ORG_NAME -M $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/tls --enrollment.profile tls --csr.hosts orderer.$ORG_NAME.com --csr.hosts localhost --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/ca-cert.pem
+fabric-ca-client enroll -u https://ordererv7:ordererv4pw@$SERVER_IP:$CA_ORDERER_PORT --caname ca-orderer-$ORG_NAME -M $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/tls --enrollment.profile tls --csr.hosts $SERVER_IP --csr.hosts localhost --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/ca-cert.pem
 
 cp $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/tls/tlscacerts/* $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/tls/ca.crt
 
@@ -124,7 +125,7 @@ mkdir -p $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/
 
 cp $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/tls/tlscacerts/* $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/orderers/orderer.$ORG_NAME.com/msp/tlscacerts/tlsca.example.com-cert.pem
 
-fabric-ca-client enroll -u https://ordererAdminv7:ordererAdminv4pw@ca_orderer_$ORG_NAME.com:$CA_ORDERER_PORT --caname ca-orderer-$ORG_NAME -M $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/users/Admin@orderer.$ORG_NAME.com/msp --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/ca-cert.pem
+fabric-ca-client enroll -u https://ordererAdminv7:ordererAdminv4pw@$SERVER_IP:$CA_ORDERER_PORT --caname ca-orderer-$ORG_NAME -M $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/users/Admin@orderer.$ORG_NAME.com/msp --tls.certfiles $PWD/organizations/fabric-ca/orderer$ORG_NAME.com/ca-cert.pem
 
 cp $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/msp/config.yaml $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/users/Admin@orderer.$ORG_NAME.com/msp/config.yaml
 

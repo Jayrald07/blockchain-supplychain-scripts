@@ -8,6 +8,7 @@ ORG_NAME=$3
 PEER_PORT=$4
 ORDERER_ADMIN_PORT=$5
 ORDERER_GENERAL_PORT=$6
+SERVER_IP=$7
 
 # Define here the dynamic configtx.yaml generation
 
@@ -56,7 +57,7 @@ Organizations:
         Rule: \"OR('Orderer$(echo $ORG_NAME)MSP.admin')\"
 
     OrdererEndpoints:
-      - orderer.$ORG_NAME.com:$ORDERER_GENERAL_PORT
+      - $SERVER_IP:$ORDERER_GENERAL_PORT
 
   - &$(echo $ORG_NAME)MSP
     # DefaultOrg defines the organization which is used in the sampleconfig
@@ -192,12 +193,12 @@ Orderer: &OrdererDefaults # Orderer Type: The orderer implementation to start
   # as TLS validation.  The preferred way to specify orderer addresses is now
   # to include the OrdererEndpoints item in your org definition
   Addresses:
-    - orderer.$ORG_NAME.com:$ORDERER_GENERAL_PORT
+    - $SERVER_IP:$ORDERER_GENERAL_PORT
     # - localhost:$ORDERER_GENERAL_PORT
 
   EtcdRaft:
     Consenters:
-      - Host: orderer.$ORG_NAME.com
+      - Host: $SERVER_IP
         Port: $ORDERER_GENERAL_PORT
         ClientTLSCert: $PWD/organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.crt
         ServerTLSCert: $PWD/organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.crt
@@ -312,13 +313,13 @@ export ORDERER_CA=$PWD/organizations/ordererOrganizations/orderer.$(echo $ORG_NA
 export ORDERER_ADMIN_TLS_SIGN_CERT=$PWD/organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.crt
 export ORDERER_ADMIN_TLS_PRIVATE_KEY=$PWD/organizations/ordererOrganizations/orderer.$(echo $ORG_NAME).com/orderers/orderer.$(echo $ORG_NAME).com/tls/server.key
 
-osnadmin channel join --channelID $CHANNEL_ID --config-block $PWD/organizations/channel-artifacts/mychannel.block -o orderer.$ORG_NAME.com:$ORDERER_ADMIN_PORT --ca-file ${ORDERER_CA} --client-cert ${ORDERER_ADMIN_TLS_SIGN_CERT} --client-key ${ORDERER_ADMIN_TLS_PRIVATE_KEY}
+osnadmin channel join --channelID $CHANNEL_ID --config-block $PWD/organizations/channel-artifacts/mychannel.block -o $SERVER_IP:$ORDERER_ADMIN_PORT --ca-file ${ORDERER_CA} --client-cert ${ORDERER_ADMIN_TLS_SIGN_CERT} --client-key ${ORDERER_ADMIN_TLS_PRIVATE_KEY}
 
 # Join peer to channel (every peer)
 export CORE_PEER_LOCALMSPID=$(echo $ORG_NAME)MSP
 export CORE_PEER_TLS_ROOTCERT_FILE=$PWD/organizations/peerOrganizations/$ORG_NAME.com/tlsca/tlsca.$ORG_NAME.com-cert.pem
 export CORE_PEER_MSPCONFIGPATH=$PWD/organizations/peerOrganizations/$ORG_NAME.com/users/Admin@$ORG_NAME.com/msp
-export CORE_PEER_ADDRESS=$ORG_NAME.com:$PEER_PORT
+export CORE_PEER_ADDRESS=$SERVER_IP:$PEER_PORT
 export CORE_PEER_TLS_ENABLED=true
 
 peer channel join -b $PWD/organizations/channel-artifacts/mychannel.block
