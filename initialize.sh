@@ -184,13 +184,13 @@ services:
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
       - CORE_PEER_LISTENADDRESS=0.0.0.0:$PEER_PORT
       - CORE_PEER_CHAINCODEADDRESS=$SERVER_IP:$inc
-      - CORE_PEER_CHAINCODELISTENADDRESS=$SERVER_IP:$inc
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:$inc
       - CORE_PEER_GOSSIP_BOOTSTRAP=$SERVER_IP:$PEER_PORT
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=$SERVER_IP:$PEER_PORT
       - CORE_PEER_LOCALMSPID=$(echo $ORG_NAME)MSP
       - CORE_METRICS_PROVIDER=prometheus
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={\"peername\":\"peer0org1\"}
-      - CORE_CHAINCODE_EXECUTETIMEOUT=300s      
+      - CORE_CHAINCODE_EXECUTETIMEOUT=1s      
     volumes:
       - /var/lib/docker/volumes/$NODE_ID/_data/organizations/peerOrganizations/$ORG_NAME.com/peers/$ORG_NAME.com:/etc/hyperledger/fabric        
       - $ORG_NAME.com:/var/hyperledger/production
