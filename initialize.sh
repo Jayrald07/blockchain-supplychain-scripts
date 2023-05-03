@@ -13,7 +13,7 @@ PEER_PORT=0
 NODE_OU=""
 MSP=""
 SERVER_IP=""
-FORMATTED_IP=""
+FORMATTED_IP="$(echo $SERVER_IP | sed 's/\./-/g')"
 
 while [[ $# -ge 1 ]] ; do
     arg="$1"
@@ -43,8 +43,7 @@ while [[ $# -ge 1 ]] ; do
         ;;
     --ca-port )
         CA_PORT="$2"
-        FORMATTED_IP="$(echo $SERVER_IP | sed 's/\./-/g')"
-        NODE_OU="-$CA_PORT-ca-$ORG_NAME"
+        NODE_OU="$FORMATTED_IP-$CA_PORT-ca-$ORG_NAME"
         shift
         ;;
     --ca-orderer-username )

@@ -14,7 +14,7 @@ export CORE_PEER_ADDRESS=$SERVER_IP:$PEER_PORT
 export CORE_PEER_TLS_ENABLED=true
 
 # Create anchor peers
-peer channel fetch config config_block.pb -o $SERVER_IP:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.$ORG_NAME.com -c $CHANNEL_ID --tls --cafile $ORDERER_CA
+peer channel fetch config config_block.pb -o $SERVER_IP:$ORDERER_GENERAL_PORT -c $CHANNEL_ID --tls --cafile $ORDERER_CA
 
 configtxlator proto_decode --input config_block.pb --type common.Block --output config_block.json
 
@@ -36,7 +36,7 @@ echo '{"payload":{"header":{"channel_header":{"channel_id":"'$CHANNEL_ID'","type
 
 configtxlator proto_encode --input config_update_in_envelope.json --type common.Envelope --output MSPanchors.tx
 
-peer channel update -o $SERVER_IP:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.$ORG_NAME.com -c $CHANNEL_ID -f MSPanchors.tx --tls --cafile ${ORDERER_CA}
+peer channel update -o $SERVER_IP:$ORDERER_GENERAL_PORT -c $CHANNEL_ID -f MSPanchors.tx --tls --cafile ${ORDERER_CA}
 
 
 rm *.tx *.json *.pb
