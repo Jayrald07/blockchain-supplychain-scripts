@@ -77,21 +77,23 @@ services:
 
 " > $PWD/organizations/compose/orderer-node.yaml
 
+FORMATTED_IP="$(echo $SERVER_IP | sed 's/\./-/g')"
+
 # Create config.yaml under the msp folder of organizations
 # It includes the NodeOUs configuration
 echo "NodeOUs:
   Enable: true  
   ClientOUIdentifier:    
-    Certificate: cacerts/ca_orderer_$ORG_NAME-com-$CA_ORDERER_PORT-ca-orderer-$ORG_NAME.pem    
+    Certificate: cacerts/$FORMATTED_IP-$CA_ORDERER_PORT-ca-orderer-$ORG_NAME.pem    
     OrganizationalUnitIdentifier: client  
   PeerOUIdentifier:
-    Certificate: cacerts/ca_orderer_$ORG_NAME-com-$CA_ORDERER_PORT-ca-orderer-$ORG_NAME.pem    
+    Certificate: cacerts/$FORMATTED_IP-$CA_ORDERER_PORT-ca-orderer-$ORG_NAME.pem    
     OrganizationalUnitIdentifier: peer
   AdminOUIdentifier:
-    Certificate: cacerts/ca_orderer_$ORG_NAME-com-$CA_ORDERER_PORT-ca-orderer-$ORG_NAME.pem   
+    Certificate: cacerts/$FORMATTED_IP-$CA_ORDERER_PORT-ca-orderer-$ORG_NAME.pem   
     OrganizationalUnitIdentifier: admin  
   OrdererOUIdentifier:
-    Certificate: cacerts/ca_orderer_$ORG_NAME-com-$CA_ORDERER_PORT-ca-orderer-$ORG_NAME.pem    
+    Certificate: cacerts/$FORMATTED_IP-$CA_ORDERER_PORT-ca-orderer-$ORG_NAME.pem    
     OrganizationalUnitIdentifier: orderer" > "$PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/msp/config.yaml"
 
 mkdir -p $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.com/msp/tlscacerts
