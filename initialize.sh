@@ -243,7 +243,7 @@ services:
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=blockchain_network
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=host
     volumes:
       - /var/lib/docker/volumes/$NODE_ID/_data/organizations/compose/docker/peercfg:/etc/hyperledger/peercfg
       - \${DOCKER_SOCK}:/host/var/run/docker.sock
