@@ -92,16 +92,16 @@ createIdentity() {
     echo "NodeOUs:
   Enable: true  
   ClientOUIdentifier:    
-    Certificate: cacerts/$NODE_OU.pem    
+    Certificate: cacerts/${NODE_OU}.pem    
     OrganizationalUnitIdentifier: client  
   PeerOUIdentifier:
-    Certificate: cacerts/$NODE_OU.pem    
+    Certificate: cacerts/${NODE_OU}.pem    
     OrganizationalUnitIdentifier: peer
   AdminOUIdentifier:
-    Certificate: cacerts/$NODE_OU.pem   
+    Certificate: cacerts/${NODE_OU}.pem   
     OrganizationalUnitIdentifier: admin  
   OrdererOUIdentifier:
-    Certificate: cacerts/$NODE_OU.pem    
+    Certificate: cacerts/${NODE_OU}.pem    
     OrganizationalUnitIdentifier: orderer" > "$PWD/organizations/peerOrganizations/$ORG_NAME.com/msp/config.yaml"
 
     mkdir -p "$PWD/organizations/peerOrganizations/$ORG_NAME.com/msp/tlscacerts"
