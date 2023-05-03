@@ -43,7 +43,7 @@ while [[ $# -ge 1 ]] ; do
         ;;
     --ca-port )
         CA_PORT="$2"
-        NODE_OU="$FORMATTED_IP-$CA_PORT-ca-$ORG_NAME"
+        NODE_OU="${FORMATTED_IP}-${CA_PORT}-ca-${ORG_NAME}"
         shift
         ;;
     --ca-orderer-username )
