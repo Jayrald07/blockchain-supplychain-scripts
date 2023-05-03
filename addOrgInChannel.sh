@@ -119,7 +119,7 @@ configtxlator proto_decode --input $PWD/organizations/channel-artifacts/config_b
 jq ".data.data[0].payload.data.config" $PWD/organizations/channel-artifacts/config_block.json > $PWD/organizations/channel-artifacts/config.json
 
 addToJsonPeer() {
-jq -s '.[0] * {"channel_group":{"groups":{"Application":{"groups": {"'$(echo $ORG_NAME)'MSP":.[1]}}}}}' $PWD/organizations/channel-artifacts/config.json $PWD/organizations/peerOrganizations/$ORG_NAME.com/neworg.json > $PWD/organizations/channel-artifacts/modified_config.json
+jq -s '.[0] * {"channel_group":{"groups":{"Application":{"groups": {"'$ORG_NAME'MSP":.[1]}}}}}' $PWD/organizations/channel-artifacts/config.json $PWD/organizations/peerOrganizations/$ORG_NAME.com/neworg.json > $PWD/organizations/channel-artifacts/modified_config.json
 }
 
 addToJsonOrderer() {
@@ -129,7 +129,7 @@ export CERT=`base64 $PWD/organizations/ordererOrganizations/orderer.$ORG_NAME.co
 
 cat $PWD/organizations/channel-artifacts/pre_modified_config.json | jq '.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters += [{"client_tls_cert":"'$CERT'", "host":"'$SERVER_IP'", "port": '$ORDERER_GENERAL_PORT',"server_tls_cert":"'$CERT'"}]' > $PWD/organizations/channel-artifacts/pre_med_modified_config.json
 
-cat $PWD/organizations/channel-artifacts/pre_med_modified_config.json | jq '.channel_group.values.OrdererAddresses.value.addresses += ['$SERVER_IP':'$ORDERER_GENERAL_PORT'"]' > $PWD/organizations/channel-artifacts/modified_config.json
+cat $PWD/organizations/channel-artifacts/pre_med_modified_config.json | jq '.channel_group.values.OrdererAddresses.value.addresses += ["'$SERVER_IP':'$ORDERER_GENERAL_PORT'"]' > $PWD/organizations/channel-artifacts/modified_config.json
 
 }
 
@@ -158,7 +158,7 @@ configtxlator proto_decode --input $PWD/organizations/channel-artifacts/_update.
 
 # wrap it in envelope which should have the header to know it is for update
 
-echo '{"payload":{"header":{"channel_header":{"channel_id":"'$(echo $CHANNEL_ID)'", "type":2}},"data":{"config_update":'$(cat $PWD/organizations/channel-artifacts/_update.json)'}}}' | jq . > $PWD/organizations/channel-artifacts/_update_in_envelope.json
+echo '{"payload":{"header":{"channel_header":{"channel_id":"'$CHANNEL_ID'", "type":2}},"data":{"config_update":'$(cat $PWD/organizations/channel-artifacts/_update.json)'}}}' | jq . > $PWD/organizations/channel-artifacts/_update_in_envelope.json
 
 # now, convert the  update to .pb envelope
 configtxlator proto_encode --input $PWD/organizations/channel-artifacts/_update_in_envelope.json --type common.Envelope --output $PWD/organizations/channel-artifacts/_update_in_envelope.pb
