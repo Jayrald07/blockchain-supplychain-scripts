@@ -159,7 +159,7 @@ volumes:
 
 networks:
   production:
-    name: host
+    name: blockchain_network
 
 services:
 
@@ -184,7 +184,7 @@ services:
       - CORE_PEER_ADDRESS=$SERVER_IP:$PEER_PORT
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
       - CORE_PEER_LISTENADDRESS=0.0.0.0:$PEER_PORT
-      - CORE_PEER_CHAINCODEADDRESS=0.0.0.0:$inc
+      - CORE_PEER_CHAINCODEADDRESS=$ORG_NAME.com:$inc
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:$inc
       - CORE_PEER_GOSSIP_BOOTSTRAP=$SERVER_IP:$PEER_PORT
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=$SERVER_IP:$PEER_PORT
