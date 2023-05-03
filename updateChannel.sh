@@ -42,4 +42,4 @@ fi
 
 # peer channel signconfigtx -f $PWD/channel-artifacts/_update_in_envelope.pb
 
-peer channel update -f $PWD/organizations/channel-artifacts/_update_in_envelope.pb -c $CHANNEL_ID -o $SERVER_IP:$ORDERER_GENERAL_PORT --ordererTLSHostnameOverride orderer.$ORG_NAME.com --tls --cafile $ORDERER_CA
+peer channel update -f $PWD/organizations/channel-artifacts/_update_in_envelope.pb -c $CHANNEL_ID -o $SERVER_IP:$ORDERER_GENERAL_PORT --tls --cafile $ORDERER_CA

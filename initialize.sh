@@ -44,7 +44,7 @@ while [[ $# -ge 1 ]] ; do
     --ca-port )
         CA_PORT="$2"
         FORMATTED_IP="$(echo $SERVER_IP | sed 's/\./-/g')"
-        NODE_OU="$FORMATTED_IP-$CA_PORT-ca-$ORG_NAME"
+        NODE_OU="$CA_PORT-ca-$ORG_NAME"
         shift
         ;;
     --ca-orderer-username )
