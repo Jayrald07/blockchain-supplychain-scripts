@@ -184,7 +184,7 @@ services:
       - CORE_PEER_ADDRESS=$SERVER_IP:$PEER_PORT
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
       - CORE_PEER_LISTENADDRESS=0.0.0.0:$PEER_PORT
-      - CORE_PEER_CHAINCODEADDRESS=$ORG_NAME.com:$inc
+      - CORE_PEER_CHAINCODEADDRESS=$SERVER_IP:$inc
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:$inc
       - CORE_PEER_GOSSIP_BOOTSTRAP=$SERVER_IP:$PEER_PORT
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=$SERVER_IP:$PEER_PORT
@@ -244,7 +244,7 @@ services:
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=host
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=blockchain_network
     volumes:
       - /var/lib/docker/volumes/$NODE_ID/_data/organizations/compose/docker/peercfg:/etc/hyperledger/peercfg
       - \${DOCKER_SOCK}:/host/var/run/docker.sock
