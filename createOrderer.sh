@@ -29,7 +29,7 @@ volumes:
 
 networks:
   production:
-    name: blockchain_network
+    name: host
 
 services:
   orderer.$ORG_NAME.com:
