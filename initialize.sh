@@ -159,7 +159,7 @@ volumes:
 
 networks:
   production:
-    name: host
+    name: blockchain_network
 
 services:
 
@@ -231,7 +231,7 @@ echo "version: '3.7'
 
 networks:
   production:
-    name: host
+    name: blockchain_network
 
 services:
 
@@ -244,7 +244,7 @@ services:
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=host
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=blockchain_network
     volumes:
       - /var/lib/docker/volumes/$NODE_ID/_data/organizations/compose/docker/peercfg:/etc/hyperledger/peercfg
       - \${DOCKER_SOCK}:/host/var/run/docker.sock

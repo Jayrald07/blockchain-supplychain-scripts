@@ -14,7 +14,7 @@ version: '3.7'
 
 networks:
   production:
-    name: host
+    name: blockchain_network
 
 services:
 
