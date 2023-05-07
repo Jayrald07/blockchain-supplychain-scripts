@@ -36,6 +36,7 @@ services:
   orderer.$ORG_NAME.com:
     container_name: orderer.$ORG_NAME.com
     image: hyperledger/fabric-orderer:2.4.7
+    network_mode: host
     restart: always
     labels:
       service: hyperledger-fabric
@@ -73,8 +74,6 @@ services:
       - $GENERAL:$GENERAL
       - $ADMIN:$ADMIN
       - $OPERATIONS:$OPERATIONS
-    networks:
-      - production
 
 " > $PWD/organizations/compose/orderer-node.yaml
 

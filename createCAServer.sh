@@ -21,6 +21,7 @@ services:
 
   ca_$ORG_NAME.com:
     image: hyperledger/fabric-ca:latest
+    network_mode: host
     restart: always
     labels:
       service: hyperledger-fabric
@@ -38,11 +39,10 @@ services:
     volumes:
       - /var/lib/docker/volumes/$NODE_ID/_data/organizations/fabric-ca/$ORG_NAME.com:/etc/hyperledger/fabric-ca-server
     container_name: ca_$ORG_NAME
-    networks:
-      - production
 
   ca_orderer_$ORG_NAME.com:
     image: hyperledger/fabric-ca:latest
+    network_mode: host
     restart: always
     labels:
       service: hyperledger-fabric
@@ -60,8 +60,7 @@ services:
     volumes:
       - /var/lib/docker/volumes/$NODE_ID/_data/organizations/fabric-ca/orderer$ORG_NAME.com:/etc/hyperledger/fabric-ca-server
     container_name: ca_orderer_$ORG_NAME
-    networks:
-      - production
+
 " > $PWD/organizations/compose/ca.yaml
 
 docker compose -f $PWD/organizations/compose/ca.yaml up -d

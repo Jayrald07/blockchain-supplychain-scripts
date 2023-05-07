@@ -167,6 +167,7 @@ services:
   $ORG_NAME.com:
     container_name: $ORG_NAME.com
     image: hyperledger/fabric-peer:2.4.7
+    network_mode: host
     restart: always
     labels:
       service: hyperledger-fabric
@@ -200,12 +201,11 @@ services:
     command: peer node start
     ports:
       - $PEER_PORT:$PEER_PORT
-    networks:
-      - production
 
   cli.$ORG_NAME.com:
     container_name: cli.$ORG_NAME.com
     image: hyperledger/fabric-tools:2.4.7
+    network_mode: host
     restart: always
     labels:
       service: hyperledger-fabric
@@ -223,8 +223,6 @@ services:
       - /var/lib/docker/volumes/$NODE_ID/_data/scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
     depends_on:
       - $ORG_NAME.com
-    networks:
-      - production
     
 " > "$PWD/organizations/compose/peer-node.yaml"
 
@@ -240,13 +238,14 @@ services:
   $ORG_NAME.com:
     container_name: $ORG_NAME.com
     image: hyperledger/fabric-peer:2.4.7
+    network_mode: host
     restart: always
     labels:
       service: hyperledger-fabric
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=blockchain_network
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=host
     volumes:
       - /var/lib/docker/volumes/$NODE_ID/_data/organizations/compose/docker/peercfg:/etc/hyperledger/peercfg
       - \${DOCKER_SOCK}:/host/var/run/docker.sock
@@ -254,6 +253,7 @@ services:
   cli.$ORG_NAME.com:
     container_name: cli.$ORG_NAME.com
     image: hyperledger/fabric-tools:2.4.7
+    network_mode: host
     restart: always
     volumes:
       - /var/lib/docker/volumes/$NODE_ID/_data/organizations/compose/docker/peercfg:/etc/hyperledger/peercfg
