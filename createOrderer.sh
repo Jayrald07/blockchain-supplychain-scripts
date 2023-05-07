@@ -30,6 +30,7 @@ volumes:
 networks:
   production:
     name: blockchain_network
+    driver: host
 
 services:
   orderer.$ORG_NAME.com:

@@ -15,6 +15,7 @@ version: '3.7'
 networks:
   production:
     name: blockchain_network
+    driver: host
 
 services:
 

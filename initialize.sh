@@ -160,11 +160,12 @@ volumes:
 networks:
   production:
     name: blockchain_network
+    driver: host
 
 services:
 
-  $SERVER_IP:
-    container_name: $SERVER_IP
+  $ORG_NAME.com:
+    container_name: $ORG_NAME.com
     image: hyperledger/fabric-peer:2.4.7
     restart: always
     labels:
@@ -221,7 +222,7 @@ services:
       - /var/lib/docker/volumes/$NODE_ID/_data/organizations:/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations
       - /var/lib/docker/volumes/$NODE_ID/_data/scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
     depends_on:
-      - $SERVER_IP
+      - $ORG_NAME.com
     networks:
       - production
     
@@ -232,11 +233,12 @@ echo "version: '3.7'
 networks:
   production:
     name: blockchain_network
+    driver: host
 
 services:
 
-  $SERVER_IP:
-    container_name: $SERVER_IP
+  $ORG_NAME.com:
+    container_name: $ORG_NAME.com
     image: hyperledger/fabric-peer:2.4.7
     restart: always
     labels:
